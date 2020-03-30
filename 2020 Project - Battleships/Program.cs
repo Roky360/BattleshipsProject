@@ -33,21 +33,28 @@ namespace _2020_Project___Battleships
 
         static void Main(string[] args)
         {
-            //Board PlayerHitBoard = new Board("Player", 10, 10); // create the player's board
-            //Board CpuHitBoard = new Board("CPU", 10, 10); // create the CPU's board
+            
+            bool restart = true;
 
-            //PlayerHitBoard.PrintBoard();
-            //CpuHitBoard.PrintBoard();
+            while (restart)
+            {
+                _ = new Game();
+                restart = Game.StartGame();
+            }
 
-            Console.WriteLine("What is your name?");
-            string usrName = Console.ReadLine();
-            Player player1 = new Player(usrName);
-            // Player player2 = new Player("CPU");
-            player1.gameBoard.PrintBoard();
-            // Console.WriteLine($"{a.Id}, {b.Id}");
-
+            Console.WriteLine("Thanks for playing our game! Hope you enjoyed it :)");
+            Console.WriteLine("credits...");
 
 
+
+            
+            
+
+            
+
+
+            /*
+             * input check
             int x;
             bool isNumber;
             isNumber = int.TryParse(Console.ReadLine(), out x);
@@ -58,16 +65,7 @@ namespace _2020_Project___Battleships
                 isNumber = int.TryParse(Console.ReadLine(), out x);
             }
             Console.WriteLine(isNumber);
-
-            
-            
-
-            
-
-
-
-
-
+            */
 
 
 
@@ -81,13 +79,14 @@ namespace _2020_Project___Battleships
                 * CPU
                   - free shot
                   - search shot
-
+            - win condition
             - colors:
 
 
             ---
             FIXES:
-            
+            - error msgs for ship creaion: sometimes tell the usr wrong explanation.
+            - versions of the ship creation and etc.. to the CPU
 
 
             */

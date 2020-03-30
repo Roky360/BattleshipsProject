@@ -8,7 +8,7 @@ namespace _2020_Project___Battleships
     {
         public string Name { get; set; }
         private Position BoardBoundaries { get; set; }
-        public char[,] arrayBoard { get; set; }
+        public char[,] ArrayBoard { get; set; }
 
 
         // constructor
@@ -16,8 +16,8 @@ namespace _2020_Project___Battleships
         {
             Name = name;
             BoardBoundaries = new Position(row, column);
-            arrayBoard = new char[row, column];
-            ResetBoard(arrayBoard);
+            ArrayBoard = new char[row, column];
+            ResetBoard(ArrayBoard);
         }
 
 
@@ -41,7 +41,7 @@ namespace _2020_Project___Battleships
             Console.WriteLine($"{Name}'s Board:");
             // print board index - numbers
             Console.Write("  ");
-            for (int i = 0; i < arrayBoard.GetLength(0); i++)
+            for (int i = 0; i < ArrayBoard.GetLength(0); i++)
             {
                 Console.Write("| " + (i) + " ");
             }
@@ -49,18 +49,18 @@ namespace _2020_Project___Battleships
 
             // underline
             Console.Write("  ");
-            for (int i = 0; i < arrayBoard.GetLength(0); i++)
+            for (int i = 0; i < ArrayBoard.GetLength(0); i++)
             {
                 Console.Write("----");
             }
             Console.WriteLine();
 
-            for (int i = 0; i < arrayBoard.GetLength(0); i++) // print board index - characters
+            for (int i = 0; i < ArrayBoard.GetLength(0); i++) // print board index - characters
             {
                 Console.Write((char)('A' + i) + " ");
-                for (int j = 0; j < arrayBoard.GetLength(1); j++) // print the board
+                for (int j = 0; j < ArrayBoard.GetLength(1); j++) // print the board
                 {
-                    Console.Write("| " + arrayBoard[i, j] + " ");
+                    Console.Write("| " + ArrayBoard[i, j] + " ");
                 }
                 Console.WriteLine("|"); Console.WriteLine("-------------------------------------------");
             }

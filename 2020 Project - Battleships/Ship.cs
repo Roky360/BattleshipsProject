@@ -17,9 +17,9 @@ namespace _2020_Project___Battleships
         public Ship(Position startingPos, bool horizontal, int length)
         {
             Id = NextID++;
-            this.StartingPos = startingPos;
-            this.Horizontal = horizontal;
-            this.Length = length;
+            StartingPos = startingPos;
+            Horizontal = horizontal;
+            Length = length;
         }
 
 
@@ -175,10 +175,10 @@ namespace _2020_Project___Battleships
 
             // run boundaries check first and if passed - run occupation check
             // because if out of boundaries the occupation check will blow the program cause it using the array.
-            boundariesCheck = BoundariesCheck(board.arrayBoard, usrPos, horizontal, length);
+            boundariesCheck = BoundariesCheck(board.ArrayBoard, usrPos, horizontal, length);
             if (boundariesCheck)
             {
-                occupationCheck = OccupationCheck(board.arrayBoard, usrPos, horizontal, length);
+                occupationCheck = OccupationCheck(board.ArrayBoard, usrPos, horizontal, length);
                 if (occupationCheck) buildable = true;
             }
             
@@ -199,10 +199,10 @@ namespace _2020_Project___Battleships
                 horizontal = GetDirectionUser();
 
                 // building checks with new values
-                boundariesCheck = BoundariesCheck(board.arrayBoard, usrPos, horizontal, length);
+                boundariesCheck = BoundariesCheck(board.ArrayBoard, usrPos, horizontal, length);
                 if (boundariesCheck)
                 {
-                    occupationCheck = OccupationCheck(board.arrayBoard, usrPos, horizontal, length);
+                    occupationCheck = OccupationCheck(board.ArrayBoard, usrPos, horizontal, length);
                     if (occupationCheck) buildable = true;
                 }
             }
@@ -214,14 +214,14 @@ namespace _2020_Project___Battleships
             {
                 for (int i = 0; i < length; i++)
                 {
-                    board.arrayBoard[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
+                    board.ArrayBoard[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
                     usrPos.Col++;
                 }
             }
             else {
                 for (int i = 0; i < length; i++)
                 {
-                    board.arrayBoard[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
+                    board.ArrayBoard[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
                     usrPos.Row++;
                 }
             }
