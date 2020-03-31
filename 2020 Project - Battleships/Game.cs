@@ -23,6 +23,7 @@ namespace _2020_Project___Battleships
          * at the end of the game it asks the user if restart and return the answer to the main program. */
         public static bool StartGame()
         {
+            // If restart the game at the end.
             bool restart = false;
 
 
@@ -32,6 +33,7 @@ namespace _2020_Project___Battleships
 
 
 
+            // asks the user if restart
             Console.Write("Restart? [y/n] ");
             char restartAns = Console.ReadKey().KeyChar;
             Console.WriteLine();

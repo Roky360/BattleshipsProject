@@ -42,12 +42,13 @@ namespace _2020_Project___Battleships
                 restart = Game.StartGame();
             }
 
-            Console.WriteLine("Thanks for playing our game! Hope you enjoyed it :)");
-            Console.WriteLine("credits...");
-
-
+            Console.WriteLine("Thanks for playing our game! We hope you enjoyed it :)");
+            Console.WriteLine("credits... not to leizan!!");
+            
 
             
+
+
             
 
             
@@ -72,21 +73,19 @@ namespace _2020_Project___Battleships
             /*
             TO DO LIST:
             - instructions: Ron
-            - ship create function for cpu:
             - destroying mechanism:
-                * Player
+                * Player : Ron
                   - fire shot
-                * CPU
+                * CPU : Eden
                   - free shot
                   - search shot
-            - win condition
-            - colors:
+            - win condition: Ron
+            - colors: Eden
 
 
             ---
             FIXES:
-            - error msgs for ship creaion: sometimes tell the usr wrong explanation.
-            - versions of the ship creation and etc.. to the CPU
+
 
 
             */

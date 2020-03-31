@@ -24,7 +24,7 @@ namespace _2020_Project___Battleships
 
 
         /* Position Checking 
-         * getting starting position (row,column) for the ship
+         * getting starting position (row,column) for the ship (values must be 0-9)
          * return the values */
         private static Position GetPositionUser()
         {
@@ -163,7 +163,7 @@ namespace _2020_Project___Battleships
             // Declaring the "building permits"
             bool buildable = false;
             bool boundariesCheck;
-            bool occupationCheck = false;
+            bool occupationCheck = true;
 
 
             // Recieve input - starting Position and Direction
@@ -233,8 +233,90 @@ namespace _2020_Project___Battleships
         }
         // UserCreate END //
 
+        /* ==== CPU ==== */
+
+        /* Generates new random int between two chosen numbers
+         * Just enter the range you want, NO NEED TO ADD 1 TO THE LAST ARGUMENT, the fn does it */
+        public static int GenerateRandInt(int min, int max)
+        {
+            Random rnd = new Random();
+            return rnd.Next(min, max + 1);
+        }
+        // GenerateRandomInt END //
 
 
+        /* Generates random bool and return true or false */
+        public static bool GenerateRandBool()
+        {            
+            if (GenerateRandInt(0, 1) == 0) 
+                return false;
+            else 
+                return true;
+        }
+        // GenerateRandBool END //
+
+
+        /* Creates a ship for the CPU */
+        public static Ship CpuCreate(Board board, int length)
+        {
+            // Declaring the "building permits"
+            bool buildable = false;
+            bool boundariesCheck;
+            bool occupationCheck = true;
+            
+            
+            // Position Set
+            Position cpuPos = new Position(GenerateRandInt(0, 9), GenerateRandInt(0, 9));
+            // Direction Set
+            bool horizontal = GenerateRandBool();
+
+            // run boundaries check first and if passed - run occupation check
+            // because if out of boundaries the occupation check will blow the program cause it using the array.
+            boundariesCheck = BoundariesCheck(board.ArrayBoard, cpuPos, horizontal, length);
+            if (boundariesCheck)
+            {
+                occupationCheck = OccupationCheck(board.ArrayBoard, cpuPos, horizontal, length);
+                if (occupationCheck) buildable = true;
+            }
+
+            // If not buildable (the ship doesn't pass the boundaries or occupation check) - rebuild
+            while (!buildable)
+            {
+                cpuPos = new Position(GenerateRandInt(0, 9), GenerateRandInt(0, 9));                
+                horizontal = GenerateRandBool();
+
+                // building checks with new values
+                boundariesCheck = BoundariesCheck(board.ArrayBoard, cpuPos, horizontal, length);
+                if (boundariesCheck)
+                {
+                    occupationCheck = OccupationCheck(board.ArrayBoard, cpuPos, horizontal, length);
+                    if (occupationCheck) buildable = true;
+                }
+            }
+
+            // create the ship and mark it in the board
+            Ship shipCreated = new Ship(cpuPos, horizontal, length);
+
+            if (horizontal)
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    board.ArrayBoard[cpuPos.Row, cpuPos.Col] = (char)(shipCreated.Id + 48);
+                    cpuPos.Col++;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    board.ArrayBoard[cpuPos.Row, cpuPos.Col] = (char)(shipCreated.Id + 48);
+                    cpuPos.Row++;
+                }
+            }
+
+            return shipCreated;
+        }
+        // UserCreate END //
 
 
 
