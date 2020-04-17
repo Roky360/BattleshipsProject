@@ -6,7 +6,7 @@ namespace _2020_Project___Battleships
 {
     class Game
     {
-        public static Player[] Players { get; set; } // The list of the players of the game (user, CPU)
+        public static Player[] Players { get; set; }            // The list of the players of the game (user, CPU)
 
 
         // constructor
@@ -18,6 +18,9 @@ namespace _2020_Project___Battleships
         }
 
 
+
+        /* ==== General Functions ==== */
+
         /* - Start Game -
          ~ Description: The function that runs the whole game.
          ~ after setting the players, this func manages the turn system, the shooting system and the win condition
@@ -26,7 +29,7 @@ namespace _2020_Project___Battleships
          */
         public static bool StartGame()
         {
-            
+            /* \/ for testing \/ */
             for (int i = 0; i < 30; i++)
             {
                 CpuTurn();
@@ -35,26 +38,79 @@ namespace _2020_Project___Battleships
                 Console.Clear();
             }
 
-            bool winCondition = false;//temp name
-            /*while (!winCondition)
+            while (true)
             {
                 CpuTurn();
-                // if (winCondition())
-                //      winCondition = true;
-                //      break;
-                // userTurn();
-                // if (winCondition())
-                //      winCondition = true;
-                //      break;
-            }*/
+                IsSankCheck();
+                if (WinCondition())
+                    break;
 
-            /* winning msg */
+                // userTurn();
+                IsSankCheck();
+                if (WinCondition())
+                    break;
+            }
 
             return AskRestart();
         }
         // StartGame END //
 
 
+        /* COMMENT NEEDED */
+        public static void IsSankCheck()
+        {
+            // p runs on the Players array
+            // i runs on the Ships array of each player
+            foreach (Player p in Players)
+            {
+                for (int i = 0; i < p.Ships.Length; i++)
+                {
+                    p.Ships[i].IsSank = p.Ships[i].RemainParts == 0;
+                }
+            }
+        }
+
+
+        /* COMMENT NEEDED */
+        public static bool WinCondition()
+        {
+            bool cpuWinCondition = true;
+            bool playerWinCondition = true;
+
+
+            for (int i = 0; i < Players[0].Ships.Length; i++)
+            {
+                if (Players[0].Ships[i].IsSank == false)
+                {
+                    cpuWinCondition = false;
+                    break;
+                }
+            }
+            if (cpuWinCondition)
+            {
+                Console.WriteLine("The CPU has sunk all of your ships ! You lost");
+                return true;
+            }
+
+            for (int i = 0; i < Players[1].Ships.Length; i++)
+            {
+                if (Players[1].Ships[i].IsSank == false)
+                {
+                    playerWinCondition = false;
+                    break;
+                }
+            }
+            if (playerWinCondition)
+            {
+                Console.WriteLine("You have sunken all the CPU's ships. Congratulations, you won !");
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /* COMMENT NEEDED */
         public static bool AskRestart()
         {
             // asks the user if restart
@@ -81,7 +137,55 @@ namespace _2020_Project___Battleships
         // AskRestart END //
 
 
-        /* - CPU Turn -
+        /* - Hit Try -
+         ~ Description: Used by the FreeShot and SearchShot functions as the actual attempt to hit a spot on the board, after they checked that the hitting spot is valid.
+         * Logic: The function getting the position to hit as a parameter, and other needed things such as the board and the ships array.
+         * The Fn checks if the hitted spot contains an opponent ship, then replaces the spot with the agreed mark for "hitted" - 'x'.
+         * If  not, it marks the spot for "missed" - '/'.
+         > RETURNS: Boolean. If succeed to hit a ship, return that the attempt was successful (true), if not return that the attempt was failed (false)
+         */
+        public static bool HitTry(Position hitCords)
+        {
+            // defining variables to the player's attributes for shorter calling
+            Player plyr = Players[0]; //get the player data
+            char[,] hitBoard = plyr.GameBoard.ArrayBoard; //the player's board
+            int row = hitCords.Row;
+            int col = hitCords.Col;
+            Position lastHitCords = Players[1].LastHitCords;
+            Ship[] plyrShips = plyr.Ships;
+
+
+            /* checks if any ship has got hit
+             * YES: reduces the Remain Parts attribute by 1 (-1)
+             *      sets the slot in the array to the agreed mark of "hitted" - x
+             *      sets the hitCondition variable to 4 (for the search shot to act next turn)
+             * NO:  sets the slot in the array to the agreed mark of "missed" - /
+             */
+            switch (hitBoard[row, col])
+            {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    plyrShips[hitBoard[row, col] - 48].RemainParts--;
+                    hitBoard[row, col] = 'x';
+                    lastHitCords.CopyAttributes(hitCords);
+                    return true;
+
+                default:
+                    hitBoard[row, col] = '/';
+                    return false;
+            }
+        }
+        // HitTry END //
+
+
+
+
+        /* ==== CPU ==== */
+
+        /* - CPU Turn -  COMMENT NEEDED
          * 
          */
         public static void CpuTurn()
@@ -109,7 +213,7 @@ namespace _2020_Project___Battleships
         // CpuTurn END //
 
 
-        /* - Free Shot -
+        /* - Free Shot - COMMENT NEEDED
          * 
          */
         public static void FreeShot()
@@ -118,7 +222,6 @@ namespace _2020_Project___Battleships
             Player plyr = Players[0];
             char[,] hitBoard = plyr.GameBoard.ArrayBoard;
             // random hitting position
-            //Position hitCords = new Position(0,1);
             Position hitCords = new Position(Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1), Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1));
 
 
@@ -136,21 +239,21 @@ namespace _2020_Project___Battleships
             }
         }
         // FreeShot END //
-        
+
 
         /* - Search Shot -
-         ~ Description: This function will be used if the CPU hit a ship with the free shot. 
-         ~ Instead of continue the random attempts the CPU searches the other parts of the ship he has hitted with this function,
-         ~ that searches the other ship parts in the 4 directions around the hitted spot. 
+         ~ Description: This function will be used if the CPU hits a ship with the free shot. 
+         ~ Instead of continuing the random attempts, the CPU searches the other parts of the ship he it hit with this function,
+         ~ that searches the other ship parts in the 4 directions around the hit spot. 
          ~ That way it will quickly find the other parts and destroy the ship in minimum turns.
          * Logic: Operates with one switch that decides in which direction the CPU will try to hit, based on the hitCondition variable.
          * Each value of the hit condition (1-4) represents a direction (written inside the switch).
-         * In each case the Fn 'moves' the hitCords around the hitted spot according to the direction, and tries to hit there.
-         * If succeeded, the next turn it will try in this direction again; 
-         * If not, it will decrece the hitCondition property so the next turn it will try another direction.
-         * SUCCESS HIT - Marks 'x' in the array board.
-         * FAILED HIT - Marks '/' in the array board.
-         > RETURNS: Nothing, this is Fn execute actions and has no need to return something.
+         * In each case the Fn 'moves' the hitCords around the hit spot according to the direction, and tries to strike there.
+         * If succeeded, the next turn it will try in this in the same direction; 
+         * If not, it will decrease the hitCondition property so the next turn it will try another direction.
+         * SUCCESSFUL SHOT - Marks 'x' in the array board.
+         * MISSED SHOT - Marks '/' in the array board.
+         > RETURNS: Nothing.
          */
         public static void SearchShot()
         {
@@ -187,7 +290,6 @@ namespace _2020_Project___Battleships
                 if (hitCondition == 0) // if hitCondition is 0 - exit the search shot.
                 {
                     Console.WriteLine("ALERT: HIT CONDITION < 0"); /* << DEBUGGUNG ALERT, REMOVE WHEN NOT NEEDED */
-                    isPlayed = true;
                     break;
                 }
 
@@ -244,49 +346,9 @@ namespace _2020_Project___Battleships
         // SearchShot END //
 
 
-        /* - Hit Try -
-         ~ Description: Used by the FreeShot and SearchShot functions as the actual attempt to hit a spot on the board, after they checked that the hitting spot is valid.
-         * Logic: The function getting the position to hit as a parameter, and other needed things such as the board and the ships array.
-         * The Fn checks if the hitted spot contains an opponent ship, then replaces the spot with the agreed mark for "hitted" - 'x'.
-         * If  not, it marks the spot for "missed" - '/'.
-         > RETURNS: Boolean. If succeed to hit a ship, return that the attempt was successful (true), if not return that the attempt was failed (false)
-         */
-        public static bool HitTry(Position hitCords)
-        {
-            // defining variables to the player's attributes for shorter calling
-            Player plyr = Players[0]; //get the player data
-            char[,] hitBoard = plyr.GameBoard.ArrayBoard; //the player's board
-            int row = hitCords.Row;
-            int col = hitCords.Col;
-            Position lastHitCords = Players[1].LastHitCords;
-            Ship[] plyrShips = plyr.Ships;
 
 
-            /* checks if any ship has got hit
-             * YES: reduces the Remain Parts attribute by 1 (-1)
-             *      sets the slot in the array to the agreed mark of "hitted" - x
-             *      sets the hitCondition variable to 4 (for the search shot to act next turn)
-             * NO:  sets the slot in the array to the agreed mark of "missed" - /
-             */
-            switch (hitBoard[row, col])
-            {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                    plyrShips[hitBoard[row, col] - 48].RemainParts--;
-                    hitBoard[row, col] = 'x';
-                    lastHitCords.CopyAttributes(hitCords);
-                    return true;
-
-                default:
-                    hitBoard[row, col] = '/';
-                    return false;
-            }
-        }
-        // HitTry END //
-
+        /* ==== User ==== */
 
 
 

@@ -56,6 +56,7 @@ namespace _2020_Project___Battleships
         // GenerateRandBool END //
 
 
+        /* COMMENT NEEDED */
         static void Title()
         {
             Console.WriteLine("─────────────────────────────────────────────────────────────────────────────   ");
@@ -65,28 +66,35 @@ namespace _2020_Project___Battleships
             Console.WriteLine("║    |  //      \\    ║       ║    ║     ║         \\ ║     ║   ║   ║         \\");
             Console.WriteLine("╚════┘ //        \\   ║       ║    ╚═══╛ ╚═══╛ ╘═══╛ ╜     ╙ ╘═╩═╕ ╜     ╘═══╛  ");
             Console.WriteLine("──────────────────────────────────────────── By Ron Berkhof & Eden Shaked ───   ");
+            Console.WriteLine();
         }
+
+
+        /* COMMENT NEEDED */
+        static void Instructions() // Explains the game to the user
+        {
+            Console.WriteLine("The rules of the game:");
+            Console.WriteLine("Each player receives a game board and five ships of varying lengths.");
+            Console.WriteLine("Before the game starts, each opponent secretly places their own five ships on the game board array.");
+            Console.WriteLine("Each ship must be placed horizontally or vertically across array spaces—not diagonally—and the ships can't hang off the array. Ships can touch each other, but they can't occupy the same array space. You cannot change the position of the ships after the game begins.");
+            Console.WriteLine("Players take turns firing shots (by calling out an array coordinate) to attempt to hit the opponent's enemy ships.");
+            Console.WriteLine("On your turn, input a letter and a number that identifies a row and column on your target array.");
+            Console.WriteLine("Each shot will be marked on the grid with either 'x' which means your shot hit a target or '/' which means the shot missed your target");
+            Console.WriteLine("The first player to sink all five of their opponent's ships wins the game.");
+        }
+
 
         
 
 
+
         static void Main(string[] args)
         {
-            Position pos = new Position(2, 3);
-            Board b = new Board("aaa", pos.Row, pos.Col);
-            b.PrintBoard();
-            Console.ReadKey();
+            Console.WriteLine("Welcome to...");
+            Thread.Sleep(1000);
+            Title();
+            Console.WriteLine("We glad that you here playing our game!");
 
-            for (int i = 0; i < 20; i++)
-            {
-                Player a = new Player("CPU");
-                Console.ReadKey();
-                Console.Clear();
-            }
-
-
-
-            //Title();
             bool restart = true;
 
             while (restart)
@@ -100,10 +108,12 @@ namespace _2020_Project___Battleships
 
             Console.WriteLine("Thanks for playing our game! We hope you enjoyed it :)");
             Console.WriteLine("credits... not to leizan!!");
+            
 
 
+            
 
-
+            
 
 
             /*
@@ -143,125 +153,13 @@ namespace _2020_Project___Battleships
             - win condition: Ron
             - colors: Eden
 
+            - add info about the game!
+
 
             ---
             BUG FIXES:
-            - random int & boolean: every time we want to call this Fns we need to write "Program.~~" before because it stored in the main program.
-            - search shot: hitCords check values! if out of board...
-            - change the selection of the row at the ship creation to letters.
-
+            
             */
-
-
-
-
-
-
-            /*
-                // if secceeded to hit this direction, set the hit condition to this direction again so will try to hit this direction again next turn
-                switch (hitCondition)
-                {
-                    // try ^UP^
-                    case 4:
-                        lastHitCords.Row--;
-                        if (lastHitCords.Row < 0)
-                        {
-                            hitCondition--;
-                            lastHitCords.CopyAttributes(tempCords);
-                        }
-                        else if (hitBoard[lastHitCords.Row, lastHitCords.Col] == 'x' || hitBoard[lastHitCords.Row, lastHitCords.Col] == '/')
-                        {
-                            hitCondition--;
-                        }
-                        else
-                        {
-                            if (HitTry(lastHitCords))
-                            {
-                                hitCondition = 4;
-                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
-                                successHit = true;
-                            }
-                            else hitCondition--;
-                            isPlayed = true;
-                        }
-                        break;
-
-                    // try >RIGHT>
-                    case 3:
-                        lastHitCords.Col++;
-                        if (lastHitCords.Col > 9)
-                        {
-                            hitCondition--;
-                            lastHitCords.CopyAttributes(tempCords);
-                        }
-                        else if (hitBoard[lastHitCords.Row, lastHitCords.Col] == 'x' || hitBoard[lastHitCords.Row, lastHitCords.Col] == '/')
-                        {
-                            hitCondition--;
-                        }
-                        else
-                        {
-                            if (HitTry(lastHitCords))
-                            {
-                                hitCondition = 3;
-                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
-                                successHit = true;
-                            }
-                            else hitCondition--;
-                            isPlayed = true;
-                        }
-                        break;
-
-                    // try \DOWN/
-                    case 2:
-                        lastHitCords.Row++;
-                        if (lastHitCords.Row > 9)
-                        {
-                            hitCondition--;
-                            lastHitCords.CopyAttributes(tempCords);
-                        }
-                        else if (hitBoard[lastHitCords.Row, lastHitCords.Col] == 'x' || hitBoard[lastHitCords.Row, lastHitCords.Col] == '/')
-                        {
-                            hitCondition--;
-                        }
-                        else
-                        {
-                            if (HitTry(lastHitCords))
-                            {
-                                hitCondition = 2;
-                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
-                                successHit = true;
-                            }
-                            else hitCondition--;
-                            isPlayed = true;
-                        }
-                        break;
-
-                    // try <LEFT<
-                    case 1:
-                        lastHitCords.Col--;
-                        if (lastHitCords.Col < 0)
-                        {
-                            hitCondition--;
-                            lastHitCords.CopyAttributes(tempCords);
-                        }
-                        else if (hitBoard[lastHitCords.Row, lastHitCords.Col] == 'x' || hitBoard[lastHitCords.Row, lastHitCords.Col] == '/')
-                        {
-                            hitCondition--;
-                        }
-                        else
-                        {
-                            if (HitTry(lastHitCords))
-                            {
-                                hitCondition = 1;
-                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
-                                successHit = true;
-                            }
-                            else hitCondition--;
-                            isPlayed = true;
-                        }
-                        break;
-                }//switch end
-                */
 
 
 

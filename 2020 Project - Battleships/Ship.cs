@@ -6,13 +6,13 @@ namespace _2020_Project___Battleships
 {
     class Ship
     {
-        private static int NextID = 0; // This responsable for set the Id property and increase by 1 every time
-        public int Id { get; set; } // The identity number of the ships. Each ship has a different ID number
-        public Position StartingPos { get; set; } // Contains the starting position of the ship
-        private bool Horizontal { get; set; } // Decides whether or not the ship will be horizontally (true) or vertically (false)
-        public int Length { get; set; } // Contains the length of the ship - how many slots it will occupy from the starting position
-        public int RemainParts { get; set; } // Contains how many parts remain to the ship
-        public bool isSank { get; set; } // Contains if the ship is steel "alive" - if it has at least 1 remaining slot
+        private static int NextID = 0;                          // This responsable for set the Id property and increase by 1 every time
+        public int Id { get; set; }                             // The identity number of the ships. Each ship has a different ID number
+        public Position StartingPos { get; set; }               // Contains the starting position of the ship
+        private bool Horizontal { get; set; }                   // Decides whether or not the ship will be horizontally (true) or vertically (false)
+        public int Length { get; set; }                         // Contains the length of the ship - how many slots it will occupy from the starting position
+        public int RemainParts { get; set; }                    // Contains how many parts remain to the ship
+        public bool IsSank { get; set; }                        // Contains if the ship is steel "alive" - if it has at least 1 remaining slot
 
 
         // constructor
@@ -23,9 +23,14 @@ namespace _2020_Project___Battleships
             Horizontal = horizontal;
             Length = length;
             RemainParts = length;
+            IsSank = false;
         }
 
 
+
+        /* ==== User ==== */
+
+        /* COMMENT NEEDED */
         private static char GetRowFromUser(char[,] board)
         {
             Console.Write("Row = ");
@@ -44,6 +49,7 @@ namespace _2020_Project___Battleships
         }
 
 
+        /* COMMENT NEEDED */
         private static int GetColFromUsers(char[,] board)
         {
             int col;
@@ -118,11 +124,12 @@ namespace _2020_Project___Battleships
             return horizontal;
         }
         // GetDirectionUser END //
-        
+
 
         /* Out of board boundaries checking
          * If the planned ship is devating the boundaries of the board
-         * return True or False */
+         * return True or False - if passed the Boundaries Check 
+         */
         private static bool BoundariesCheck(char[,] board, Position posShip, bool horizontal, int length)
         {
             bool isOutOfBoard = true;
@@ -163,7 +170,7 @@ namespace _2020_Project___Battleships
             // occupation check
             for (int i = 0; i < length; i++)
             {
-                isOccupied = board[posShip.Row, posShip.Col] == 0;
+                isOccupied = board[posShip.Row, posShip.Col] == 0; // check if the slot contains null
                 if (isOccupied)
                 {
                     if (horizontal) // for horizontal ship
@@ -272,31 +279,15 @@ namespace _2020_Project___Battleships
         {
             // Declaring the "building permits"
             bool buildable = false;
-            bool boundariesCheck;
-            bool occupationCheck = true;
+            bool boundariesCheck = false;
+            bool occupationCheck = false;
+            bool horizontal = false; // Direction Set (temp value)
+            Position cpuPos = new Position(0, 0); // Position Set (temp values)
+                       
 
-
-            // Position Set
-            Position cpuPos = new Position(Program.GenerateRandInt(0, board.GetLength(0) - 1), Program.GenerateRandInt(0, board.GetLength(1) - 1));
-            
-            // Direction Set
-            bool horizontal = Program.GenerateRandBool();
-            Console.WriteLine(cpuPos.ToString() + " " + horizontal);
-
-            // run boundaries check first and if passed - run occupation check
-            // because if out of boundaries the occupation check will blow the program cause it using the array.
-            boundariesCheck = BoundariesCheck(board, cpuPos, horizontal, length);
-            if (boundariesCheck)
-            {
-                occupationCheck = OccupationCheck(board, cpuPos, horizontal, length);
-                if (occupationCheck) 
-                    buildable = true;
-            }
-
-            // If not buildable (the ship doesn't pass the boundaries or occupation check) - rebuild
             while (!buildable)
             {
-                cpuPos = new Position(Program.GenerateRandInt(0, board.GetLength(0)), Program.GenerateRandInt(0, board.GetLength(1)));                
+                cpuPos = new Position(Program.GenerateRandInt(0, board.GetLength(0) - 1), Program.GenerateRandInt(0, board.GetLength(1) - 1));
                 horizontal = Program.GenerateRandBool();
 
                 // building checks with new values
@@ -331,20 +322,6 @@ namespace _2020_Project___Battleships
             return shipCreated;
         }
         // CpuCreate END //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
