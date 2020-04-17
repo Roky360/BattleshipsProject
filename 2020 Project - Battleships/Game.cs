@@ -6,33 +6,57 @@ namespace _2020_Project___Battleships
 {
     class Game
     {
-        public Player[] Players { get; set; }
+        public static Player[] Players { get; set; } // The list of the players of the game (user, CPU)
 
-        public Game()
+
+        // constructor
+        public Game(string usrName)
         {
             Players = new Player[2];
-            Console.WriteLine("What is your name?");
-            string usrName = Console.ReadLine();
             Players[0] = new Player(usrName);
             Players[1] = new Player("CPU");
         }
 
 
-        /* The function that runs the whole game.
-         * after setting the players, this func manages the turn system, the shooting system and the win condition
-         * at the end of the game it asks the user if restart and return the answer to the main program. */
+        /* - Start Game -
+         ~ Description: The function that runs the whole game.
+         ~ after setting the players, this func manages the turn system, the shooting system and the win condition
+         ~ at the end of the game it asks the user if restart and return the answer to the main program. 
+         > RETURNS: bool - whether or not to restart the game (asks the player at the end of the game).
+         */
         public static bool StartGame()
         {
-            // If restart the game at the end.
-            bool restart = false;
+            
+            for (int i = 0; i < 30; i++)
+            {
+                CpuTurn();
+                Players[0].GameBoard.PrintBoard();
+                Console.ReadKey();
+                Console.Clear();
+            }
+
+            bool winCondition = false;//temp name
+            /*while (!winCondition)
+            {
+                CpuTurn();
+                // if (winCondition())
+                //      winCondition = true;
+                //      break;
+                // userTurn();
+                // if (winCondition())
+                //      winCondition = true;
+                //      break;
+            }*/
+
+            /* winning msg */
+
+            return AskRestart();
+        }
+        // StartGame END //
 
 
-
-
-
-
-
-
+        public static bool AskRestart()
+        {
             // asks the user if restart
             Console.Write("Restart? [y/n] ");
             char restartAns = Console.ReadKey().KeyChar;
@@ -50,11 +74,219 @@ namespace _2020_Project___Battleships
             // return user answer
             if (restartAns == 'y')
             {
-                return restart = true;
+                return true;
             }
-            else return restart = false;
+            else return false;
         }
-        // StartGame END //
+        // AskRestart END //
+
+
+        /* - CPU Turn -
+         * 
+         */
+        public static void CpuTurn()
+        {
+            int hitCondition = Players[1].HitCondition;
+
+
+            if (hitCondition > 0)
+            {
+                SearchShot();
+                if (Players[1].HitCondition == 0)
+                {
+                    FreeShot();
+                }
+                else if (hitCondition == -1)
+                {
+                    hitCondition = 0;
+                }
+            }
+            else
+            {
+                FreeShot();
+            }
+        }
+        // CpuTurn END //
+
+
+        /* - Free Shot -
+         * 
+         */
+        public static void FreeShot()
+        {
+            Console.WriteLine("free Shot");
+            Player plyr = Players[0];
+            char[,] hitBoard = plyr.GameBoard.ArrayBoard;
+            // random hitting position
+            //Position hitCords = new Position(0,1);
+            Position hitCords = new Position(Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1), Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1));
+
+
+            // if the spot is already been hit, regenerage spot.
+            while (hitBoard[hitCords.Row, hitCords.Col] == 'x' || hitBoard[hitCords.Row, hitCords.Col] == '/')
+            {
+                hitCords.Col = Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1);
+                hitCords.Row = Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1);
+            }
+
+            if (HitTry(hitCords))
+            {
+                Players[1].HitCondition = 4;
+                Players[1].DestructionCount = 1;
+            }
+        }
+        // FreeShot END //
+        
+
+        /* - Search Shot -
+         ~ Description: This function will be used if the CPU hit a ship with the free shot. 
+         ~ Instead of continue the random attempts the CPU searches the other parts of the ship he has hitted with this function,
+         ~ that searches the other ship parts in the 4 directions around the hitted spot. 
+         ~ That way it will quickly find the other parts and destroy the ship in minimum turns.
+         * Logic: Operates with one switch that decides in which direction the CPU will try to hit, based on the hitCondition variable.
+         * Each value of the hit condition (1-4) represents a direction (written inside the switch).
+         * In each case the Fn 'moves' the hitCords around the hitted spot according to the direction, and tries to hit there.
+         * If succeeded, the next turn it will try in this direction again; 
+         * If not, it will decrece the hitCondition property so the next turn it will try another direction.
+         * SUCCESS HIT - Marks 'x' in the array board.
+         * FAILED HIT - Marks '/' in the array board.
+         > RETURNS: Nothing, this is Fn execute actions and has no need to return something.
+         */
+        public static void SearchShot()
+        {
+            Console.WriteLine("free Shot");
+            // Defining the needed variables
+            int hitCondition = Players[1].HitCondition;
+            Position lastHitCords = new Position(Players[1].LastHitCords.Row, Players[1].LastHitCords.Col); //create the object for the last hit position
+            Position tempCords = new Position(lastHitCords.Row, lastHitCords.Col);
+            int destructionCount = Players[1].DestructionCount;
+            char[,] hitBoard = Players[0].GameBoard.ArrayBoard;
+            bool successHit = false;
+            bool isPlayed = false;
+            
+
+            /* This while loop makes sure that if the attempt to hit was failed because the cords were out of the boundaries or already hit,
+             * it will decrease the hitCondition, wich means it will try another direction instead of skip and lose the turn. */
+            while (!isPlayed)
+            {
+                switch (hitCondition) // check in which direction to move
+                {
+                    case 4:
+                        lastHitCords.Row--;
+                        break;
+                    case 3:
+                        lastHitCords.Col++;
+                        break;
+                    case 2:
+                        lastHitCords.Row++;
+                        break;
+                    case 1:
+                        lastHitCords.Col--;
+                        break;       
+                }
+                if (hitCondition == 0) // if hitCondition is 0 - exit the search shot.
+                {
+                    Console.WriteLine("ALERT: HIT CONDITION < 0"); /* << DEBUGGUNG ALERT, REMOVE WHEN NOT NEEDED */
+                    isPlayed = true;
+                    break;
+                }
+
+                if (lastHitCords.Row >= 0 && lastHitCords.Row <= hitBoard.GetLength(0) - 1 && lastHitCords.Col >= 0 && lastHitCords.Col <= hitBoard.GetLength(1) - 1) // boundaries check
+                {
+                    switch (hitBoard[lastHitCords.Row, lastHitCords.Col]) // check if the spot is occupied
+                    {   // if occupied, try another direction
+                        case 'x':
+                        case '/':
+                            hitCondition--;
+                            lastHitCords.CopyAttributes(tempCords);
+                            break;
+
+                        default: // if not occupied, try to hit
+                            if (HitTry(lastHitCords)) // if succeeded, wil save the cords for the next turn
+                            {
+                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
+                                destructionCount++;
+                                successHit = true;
+                            }
+                            else // if failed, will check if it in a middle of destruction of a ship, if it is- will exit it and return to free shot; if not, will decreace the hitCondition and will try different direction
+                            {
+                                if (destructionCount > 1)
+                                {
+                                    hitCondition = -1;
+                                    destructionCount = 0;
+                                }
+                                else
+                                {
+                                    hitCondition--;
+                                }
+                                //hitCondition = lastHitCords.Row - 2 < 0 || lastHitCords.Col - 2 < 0 ? hitCondition-- : hitBoard[lastHitCords.Row - 2, lastHitCords.Col - 2] == 'x' ? 0 : hitCondition--;
+                            }
+                            isPlayed = true; // mark as a played turn to exit the loop and pass the turn
+                            break;
+                    }
+                }
+                else //if out of boundaries
+                {
+                    hitCondition--;
+                    lastHitCords.CopyAttributes(tempCords); // restore the position
+                }                               
+            }//while end   
+            
+
+            // apply the values from this Fn to the main variable in the outside.
+            if (!successHit)
+            {
+                Players[1].LastHitCords.CopyAttributes(tempCords);
+            }                        
+            Players[1].HitCondition = hitCondition;
+            Players[1].DestructionCount = destructionCount;
+        }
+        // SearchShot END //
+
+
+        /* - Hit Try -
+         ~ Description: Used by the FreeShot and SearchShot functions as the actual attempt to hit a spot on the board, after they checked that the hitting spot is valid.
+         * Logic: The function getting the position to hit as a parameter, and other needed things such as the board and the ships array.
+         * The Fn checks if the hitted spot contains an opponent ship, then replaces the spot with the agreed mark for "hitted" - 'x'.
+         * If  not, it marks the spot for "missed" - '/'.
+         > RETURNS: Boolean. If succeed to hit a ship, return that the attempt was successful (true), if not return that the attempt was failed (false)
+         */
+        public static bool HitTry(Position hitCords)
+        {
+            // defining variables to the player's attributes for shorter calling
+            Player plyr = Players[0]; //get the player data
+            char[,] hitBoard = plyr.GameBoard.ArrayBoard; //the player's board
+            int row = hitCords.Row;
+            int col = hitCords.Col;
+            Position lastHitCords = Players[1].LastHitCords;
+            Ship[] plyrShips = plyr.Ships;
+
+
+            /* checks if any ship has got hit
+             * YES: reduces the Remain Parts attribute by 1 (-1)
+             *      sets the slot in the array to the agreed mark of "hitted" - x
+             *      sets the hitCondition variable to 4 (for the search shot to act next turn)
+             * NO:  sets the slot in the array to the agreed mark of "missed" - /
+             */
+            switch (hitBoard[row, col])
+            {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    plyrShips[hitBoard[row, col] - 48].RemainParts--;
+                    hitBoard[row, col] = 'x';
+                    lastHitCords.CopyAttributes(hitCords);
+                    return true;
+
+                default:
+                    hitBoard[row, col] = '/';
+                    return false;
+            }
+        }
+        // HitTry END //
+
 
 
 

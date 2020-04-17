@@ -5,6 +5,7 @@ namespace _2020_Project___Battleships
 {
     class Program
     {
+        // *******
         static int GetHashCode(string str)
         {
             int hash = 0;
@@ -31,27 +32,78 @@ namespace _2020_Project___Battleships
         // *******
 
 
+
+
+
+        /* Generates new random int between two chosen numbers
+         * Just enter the range you want, NO NEED TO ADD 1 TO THE LAST ARGUMENT, the fn does it */
+        public static int GenerateRandInt(int min, int max)
+        {
+            Random rnd = new Random();
+            return rnd.Next(min, max + 1);
+        }
+        // GenerateRandomInt END //
+
+
+        /* Generates random bool and return true or false */
+        public static bool GenerateRandBool()
+        {
+            if (GenerateRandInt(0, 1) == 0)
+                return false;
+            else
+                return true;
+        }
+        // GenerateRandBool END //
+
+
+        static void Title()
+        {
+            Console.WriteLine("─────────────────────────────────────────────────────────────────────────────   ");
+            Console.WriteLine("╔════]     //\\    ═══╦═══ ═══╦═══ ╖     ╔═══  ╒═══╛ ╖     ╓ ╘═╦═╕ ╦═══╗ ╒═══╛  ");
+            Console.WriteLine("║____/    //  \\      ║       ║    ║     ║     \\     ║     ║   ║   ║   ║ \\    ");
+            Console.WriteLine("║    \\   //--- \\     ║       ║    ║     ╠══    `═\\  ╠═════╣   ║   ╠═══╝  `═\\");
+            Console.WriteLine("║    |  //      \\    ║       ║    ║     ║         \\ ║     ║   ║   ║         \\");
+            Console.WriteLine("╚════┘ //        \\   ║       ║    ╚═══╛ ╚═══╛ ╘═══╛ ╜     ╙ ╘═╩═╕ ╜     ╘═══╛  ");
+            Console.WriteLine("──────────────────────────────────────────── By Ron Berkhof & Eden Shaked ───   ");
+        }
+
+        
+
+
         static void Main(string[] args)
         {
-            
+            Position pos = new Position(2, 3);
+            Board b = new Board("aaa", pos.Row, pos.Col);
+            b.PrintBoard();
+            Console.ReadKey();
+
+            for (int i = 0; i < 20; i++)
+            {
+                Player a = new Player("CPU");
+                Console.ReadKey();
+                Console.Clear();
+            }
+
+
+
+            //Title();
             bool restart = true;
 
             while (restart)
             {
-                _ = new Game();
+                Console.Clear();
+                Console.WriteLine("What is your name?");
+                string usrName = Console.ReadLine();
+                _ = new Game(usrName);
                 restart = Game.StartGame();
             }
 
             Console.WriteLine("Thanks for playing our game! We hope you enjoyed it :)");
             Console.WriteLine("credits... not to leizan!!");
-            
-
-            
 
 
-            
 
-            
+
 
 
             /*
@@ -70,6 +122,15 @@ namespace _2020_Project___Battleships
 
 
 
+            /* Key Chars for game board:
+             * null - empty slot
+             * 0-9 - ships ID
+             * x - hit on ship slot
+             * / - hit on empty slot
+             */
+
+
+
             /*
             TO DO LIST:
             - instructions: Ron
@@ -77,18 +138,130 @@ namespace _2020_Project___Battleships
                 * Player : Ron
                   - fire shot
                 * CPU : Eden
-                  - free shot
-                  - search shot
+                  - free shot V
+                  - search shot V*
             - win condition: Ron
             - colors: Eden
 
 
             ---
-            FIXES:
-
-
+            BUG FIXES:
+            - random int & boolean: every time we want to call this Fns we need to write "Program.~~" before because it stored in the main program.
+            - search shot: hitCords check values! if out of board...
+            - change the selection of the row at the ship creation to letters.
 
             */
+
+
+
+
+
+
+            /*
+                // if secceeded to hit this direction, set the hit condition to this direction again so will try to hit this direction again next turn
+                switch (hitCondition)
+                {
+                    // try ^UP^
+                    case 4:
+                        lastHitCords.Row--;
+                        if (lastHitCords.Row < 0)
+                        {
+                            hitCondition--;
+                            lastHitCords.CopyAttributes(tempCords);
+                        }
+                        else if (hitBoard[lastHitCords.Row, lastHitCords.Col] == 'x' || hitBoard[lastHitCords.Row, lastHitCords.Col] == '/')
+                        {
+                            hitCondition--;
+                        }
+                        else
+                        {
+                            if (HitTry(lastHitCords))
+                            {
+                                hitCondition = 4;
+                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
+                                successHit = true;
+                            }
+                            else hitCondition--;
+                            isPlayed = true;
+                        }
+                        break;
+
+                    // try >RIGHT>
+                    case 3:
+                        lastHitCords.Col++;
+                        if (lastHitCords.Col > 9)
+                        {
+                            hitCondition--;
+                            lastHitCords.CopyAttributes(tempCords);
+                        }
+                        else if (hitBoard[lastHitCords.Row, lastHitCords.Col] == 'x' || hitBoard[lastHitCords.Row, lastHitCords.Col] == '/')
+                        {
+                            hitCondition--;
+                        }
+                        else
+                        {
+                            if (HitTry(lastHitCords))
+                            {
+                                hitCondition = 3;
+                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
+                                successHit = true;
+                            }
+                            else hitCondition--;
+                            isPlayed = true;
+                        }
+                        break;
+
+                    // try \DOWN/
+                    case 2:
+                        lastHitCords.Row++;
+                        if (lastHitCords.Row > 9)
+                        {
+                            hitCondition--;
+                            lastHitCords.CopyAttributes(tempCords);
+                        }
+                        else if (hitBoard[lastHitCords.Row, lastHitCords.Col] == 'x' || hitBoard[lastHitCords.Row, lastHitCords.Col] == '/')
+                        {
+                            hitCondition--;
+                        }
+                        else
+                        {
+                            if (HitTry(lastHitCords))
+                            {
+                                hitCondition = 2;
+                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
+                                successHit = true;
+                            }
+                            else hitCondition--;
+                            isPlayed = true;
+                        }
+                        break;
+
+                    // try <LEFT<
+                    case 1:
+                        lastHitCords.Col--;
+                        if (lastHitCords.Col < 0)
+                        {
+                            hitCondition--;
+                            lastHitCords.CopyAttributes(tempCords);
+                        }
+                        else if (hitBoard[lastHitCords.Row, lastHitCords.Col] == 'x' || hitBoard[lastHitCords.Row, lastHitCords.Col] == '/')
+                        {
+                            hitCondition--;
+                        }
+                        else
+                        {
+                            if (HitTry(lastHitCords))
+                            {
+                                hitCondition = 1;
+                                Players[1].LastHitCords.CopyAttributes(lastHitCords);
+                                successHit = true;
+                            }
+                            else hitCondition--;
+                            isPlayed = true;
+                        }
+                        break;
+                }//switch end
+                */
 
 
 

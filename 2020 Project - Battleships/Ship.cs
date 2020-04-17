@@ -6,11 +6,13 @@ namespace _2020_Project___Battleships
 {
     class Ship
     {
-        private static int NextID = 0;
-        public int Id { get; set; }
-        public Position StartingPos { get; set; }
-        private bool Horizontal { get; set; }
-        public int Length { get; set; }
+        private static int NextID = 0; // This responsable for set the Id property and increase by 1 every time
+        public int Id { get; set; } // The identity number of the ships. Each ship has a different ID number
+        public Position StartingPos { get; set; } // Contains the starting position of the ship
+        private bool Horizontal { get; set; } // Decides whether or not the ship will be horizontally (true) or vertically (false)
+        public int Length { get; set; } // Contains the length of the ship - how many slots it will occupy from the starting position
+        public int RemainParts { get; set; } // Contains how many parts remain to the ship
+        public bool isSank { get; set; } // Contains if the ship is steel "alive" - if it has at least 1 remaining slot
 
 
         // constructor
@@ -20,35 +22,65 @@ namespace _2020_Project___Battleships
             StartingPos = startingPos;
             Horizontal = horizontal;
             Length = length;
+            RemainParts = length;
+        }
+
+
+        private static char GetRowFromUser(char[,] board)
+        {
+            Console.Write("Row = ");
+            char rowUser = Console.ReadKey().KeyChar;
+            Console.WriteLine();
+
+            while ((rowUser < 'A' || rowUser > 'Z') && (rowUser < 'a' || rowUser > 'z'))
+            {
+                Console.WriteLine($"The input to the row selection must be a letter (small or capital) between A-{(char)(board.GetLength(0) + 64)}. Please reenter");
+                Console.Write("Row = ");
+                rowUser = Console.ReadKey().KeyChar;
+                Console.WriteLine();
+            }
+            
+            return rowUser;
+        }
+
+
+        private static int GetColFromUsers(char[,] board)
+        {
+            int col;
+            
+            Console.Write("Column = ");
+            bool isNumberY = int.TryParse(Console.ReadLine(), out col);
+
+            while (!isNumberY || col < 0 || col > board.GetLength(1))
+            {
+                Console.WriteLine($"The input to the column selection must be a number between 0-{board.GetLength(1) - 1}. Please reenter");
+                Console.Write("Column = ");
+                isNumberY = int.TryParse(Console.ReadLine(), out col);
+            }
+
+            return col;
         }
 
 
         /* Position Checking 
-         * getting starting position (row,column) for the ship (values must be 0-9)
+         * getting starting position (row,column) for the ship
          * return the values */
-        private static Position GetPositionUser()
+        private static Position GetPositionUser(char[,] board)
         {
-            Console.WriteLine("Enter starting position (row and then column)");
+            Console.WriteLine($"Enter starting position: row- a letter (A-{(char)(board.GetLength(0) + 64)}), and column- a number (0-{board.GetLength(1) - 1}) like shown in your board.");
             
-            int row;
-            Console.Write("Row = ");
-            bool isNumberX = int.TryParse(Console.ReadLine(), out row);
-            while (!isNumberX || row < 0 || row > 9)
-            {
-                Console.WriteLine("Input is not a number or not between 0-9. Please reenter");
-                Console.Write("Row = ");
-                isNumberX = int.TryParse(Console.ReadLine(), out row);
+            int row = GetRowFromUser(board);
+            // convert the char from the Fn to a number in the bounds of the array
+            if (row > 'Z')
+            {// small
+                row -= 97;
+            }
+            else
+            {// capital
+                row -= 65;
             }
 
-            int col;
-            Console.Write("Column = ");
-            bool isNumberY = int.TryParse(Console.ReadLine(), out col);
-            while (!isNumberY || col < 0 || col > 9)
-            {
-                Console.WriteLine("Input is not a number or not between 0-9. Please reenter");
-                Console.Write("Column = ");
-                isNumberY = int.TryParse(Console.ReadLine(), out col);
-            }
+            int col = GetColFromUsers(board);
 
             Position usrPos = new Position(row, col);
             return usrPos;
@@ -94,7 +126,7 @@ namespace _2020_Project___Battleships
         private static bool BoundariesCheck(char[,] board, Position posShip, bool horizontal, int length)
         {
             bool isOutOfBoard = true;
-            Position holderPos = new Position(posShip.Row, posShip.Col);
+            Position tempPos = new Position(posShip.Row, posShip.Col);
 
             // boundaries check
             if (horizontal) // for horizontal ship
@@ -113,8 +145,7 @@ namespace _2020_Project___Battleships
             }
 
             // restore position and return result
-            posShip.Row = holderPos.Row;
-            posShip.Col = holderPos.Col;
+            posShip.CopyAttributes(tempPos);
             return isOutOfBoard;
         }
         // IsOutOfBoard END //
@@ -122,43 +153,39 @@ namespace _2020_Project___Battleships
 
         /* Board occupation checking
          * If is another ship occupying new ship's slots
-         * return True or False */
+         * return True or False - if passed the occupation check */
         private static bool OccupationCheck(char[,] board, Position posShip, bool horizontal, int length)
         {
             bool isOccupied = true;
-            Position holderPos = new Position(posShip.Row, posShip.Col);
+            Position tempPos = new Position(posShip.Row, posShip.Col);
 
 
             // occupation check
-            if (horizontal) // for horizontal ship
+            for (int i = 0; i < length; i++)
             {
-                for (int i = 0; i < length; i++)
+                isOccupied = board[posShip.Row, posShip.Col] == 0;
+                if (isOccupied)
                 {
-                    isOccupied = board[posShip.Row, posShip.Col] == 0;
-                    if (!isOccupied) break;
-                    posShip.Col++;
+                    if (horizontal) // for horizontal ship
+                    {
+                        posShip.Col++;
+                    } // for vertical ship
+                    else posShip.Row++;
                 }
-            }
-            else // for vertical ship
-            {
-                for (int i = 0; i < length; i++)
-                {
-                    isOccupied = board[posShip.Row, posShip.Col] == 0;
-                    if (!isOccupied) break;
-                    posShip.Row++;
-                }
+                else
+                    break;
             }
 
+
             // restore position and return result
-            posShip.Row = holderPos.Row;
-            posShip.Col = holderPos.Col;
+            posShip.CopyAttributes(tempPos);
             return isOccupied;
         }
         // IsOccupied END //
 
 
         /* Creates a ship for the user */
-        public static Ship UserCreate(Board board, int length)
+        public static Ship UserCreate(char[,] board, int length)
         {
             // Declaring the "building permits"
             bool buildable = false;
@@ -169,16 +196,16 @@ namespace _2020_Project___Battleships
             // Recieve input - starting Position and Direction
             Console.WriteLine($"Let's create a new ship in the length of {length}");
             // Position Get
-            Position usrPos = GetPositionUser();
+            Position usrPos = GetPositionUser(board);
             // Direction Get
             bool horizontal = GetDirectionUser();
 
             // run boundaries check first and if passed - run occupation check
             // because if out of boundaries the occupation check will blow the program cause it using the array.
-            boundariesCheck = BoundariesCheck(board.ArrayBoard, usrPos, horizontal, length);
+            boundariesCheck = BoundariesCheck(board, usrPos, horizontal, length);
             if (boundariesCheck)
             {
-                occupationCheck = OccupationCheck(board.ArrayBoard, usrPos, horizontal, length);
+                occupationCheck = OccupationCheck(board, usrPos, horizontal, length);
                 if (occupationCheck) buildable = true;
             }
             
@@ -195,14 +222,14 @@ namespace _2020_Project___Battleships
                     Console.WriteLine("The values you entered cannot build a ship because another ship is occupying some slots. Please enter new values for the ship.");
                 }
 
-                usrPos = GetPositionUser();
+                usrPos = GetPositionUser(board);
                 horizontal = GetDirectionUser();
 
                 // building checks with new values
-                boundariesCheck = BoundariesCheck(board.ArrayBoard, usrPos, horizontal, length);
+                boundariesCheck = BoundariesCheck(board, usrPos, horizontal, length);
                 if (boundariesCheck)
                 {
-                    occupationCheck = OccupationCheck(board.ArrayBoard, usrPos, horizontal, length);
+                    occupationCheck = OccupationCheck(board, usrPos, horizontal, length);
                     if (occupationCheck) buildable = true;
                 }
             }
@@ -214,17 +241,18 @@ namespace _2020_Project___Battleships
             {
                 for (int i = 0; i < length; i++)
                 {
-                    board.ArrayBoard[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
+                    board[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
                     usrPos.Col++;
                 }
             }
             else {
                 for (int i = 0; i < length; i++)
                 {
-                    board.ArrayBoard[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
+                    board[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
                     usrPos.Row++;
                 }
             }
+
 
             // successful msg and return the created ship.
             Console.WriteLine("Ship created successfuly!");
@@ -233,63 +261,49 @@ namespace _2020_Project___Battleships
         }
         // UserCreate END //
 
+
+
+
         /* ==== CPU ==== */
 
-        /* Generates new random int between two chosen numbers
-         * Just enter the range you want, NO NEED TO ADD 1 TO THE LAST ARGUMENT, the fn does it */
-        public static int GenerateRandInt(int min, int max)
-        {
-            Random rnd = new Random();
-            return rnd.Next(min, max + 1);
-        }
-        // GenerateRandomInt END //
-
-
-        /* Generates random bool and return true or false */
-        public static bool GenerateRandBool()
-        {            
-            if (GenerateRandInt(0, 1) == 0) 
-                return false;
-            else 
-                return true;
-        }
-        // GenerateRandBool END //
-
-
-        /* Creates a ship for the CPU */
-        public static Ship CpuCreate(Board board, int length)
+        /* Creates a ship for the CPU 
+         * returns the new ship that created */
+        public static Ship CpuCreate(char[,] board, int length)
         {
             // Declaring the "building permits"
             bool buildable = false;
             bool boundariesCheck;
             bool occupationCheck = true;
-            
-            
+
+
             // Position Set
-            Position cpuPos = new Position(GenerateRandInt(0, 9), GenerateRandInt(0, 9));
+            Position cpuPos = new Position(Program.GenerateRandInt(0, board.GetLength(0) - 1), Program.GenerateRandInt(0, board.GetLength(1) - 1));
+            
             // Direction Set
-            bool horizontal = GenerateRandBool();
+            bool horizontal = Program.GenerateRandBool();
+            Console.WriteLine(cpuPos.ToString() + " " + horizontal);
 
             // run boundaries check first and if passed - run occupation check
             // because if out of boundaries the occupation check will blow the program cause it using the array.
-            boundariesCheck = BoundariesCheck(board.ArrayBoard, cpuPos, horizontal, length);
+            boundariesCheck = BoundariesCheck(board, cpuPos, horizontal, length);
             if (boundariesCheck)
             {
-                occupationCheck = OccupationCheck(board.ArrayBoard, cpuPos, horizontal, length);
-                if (occupationCheck) buildable = true;
+                occupationCheck = OccupationCheck(board, cpuPos, horizontal, length);
+                if (occupationCheck) 
+                    buildable = true;
             }
 
             // If not buildable (the ship doesn't pass the boundaries or occupation check) - rebuild
             while (!buildable)
             {
-                cpuPos = new Position(GenerateRandInt(0, 9), GenerateRandInt(0, 9));                
-                horizontal = GenerateRandBool();
+                cpuPos = new Position(Program.GenerateRandInt(0, board.GetLength(0)), Program.GenerateRandInt(0, board.GetLength(1)));                
+                horizontal = Program.GenerateRandBool();
 
                 // building checks with new values
-                boundariesCheck = BoundariesCheck(board.ArrayBoard, cpuPos, horizontal, length);
+                boundariesCheck = BoundariesCheck(board, cpuPos, horizontal, length);
                 if (boundariesCheck)
                 {
-                    occupationCheck = OccupationCheck(board.ArrayBoard, cpuPos, horizontal, length);
+                    occupationCheck = OccupationCheck(board, cpuPos, horizontal, length);
                     if (occupationCheck) buildable = true;
                 }
             }
@@ -301,7 +315,7 @@ namespace _2020_Project___Battleships
             {
                 for (int i = 0; i < length; i++)
                 {
-                    board.ArrayBoard[cpuPos.Row, cpuPos.Col] = (char)(shipCreated.Id + 48);
+                    board[cpuPos.Row, cpuPos.Col] = (char)(shipCreated.Id + 48);
                     cpuPos.Col++;
                 }
             }
@@ -309,14 +323,14 @@ namespace _2020_Project___Battleships
             {
                 for (int i = 0; i < length; i++)
                 {
-                    board.ArrayBoard[cpuPos.Row, cpuPos.Col] = (char)(shipCreated.Id + 48);
+                    board[cpuPos.Row, cpuPos.Col] = (char)(shipCreated.Id + 48);
                     cpuPos.Row++;
                 }
             }
 
             return shipCreated;
         }
-        // UserCreate END //
+        // CpuCreate END //
 
 
 
