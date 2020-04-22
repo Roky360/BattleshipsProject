@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace _2020_Project___Battleships
@@ -10,6 +8,7 @@ namespace _2020_Project___Battleships
         public string Name { get; set; }                        // The name of the player
         public Board GameBoard { get; set; }                    // The game board of the player, where all his ships are
         public Ship[] Ships { get; set; }                       // Array that stores the player's ships
+        public Position LastHitColor { get; set; }              // The last hit position for the coloring system
         // Used for CPU only \/
         public int HitCondition { get; set; }                   // hit condition of the CPU (direction where to hit next search shot)
         public Position LastHitCords { get; set; }              // Stores the position of the last successful shot of the CPU
@@ -21,8 +20,14 @@ namespace _2020_Project___Battleships
         public Player(string name)
         {
             Name = name;
-            GameBoard = new Board(Name, 10, 10);
+            Position boardSize = new Position(10, 10); // default values
+            if (Name != "CPU")
+                boardSize = Game.Setup();
+            GameBoard = new Board(Name, boardSize);
             Ships = new Ship[5];
+            LastHitColor = new Position(2, 2);  // ****
+            LastHitColor.ToString();
+            Console.ReadKey();
             HitCondition = 0;
             LastHitCords = new Position(0, 0);
             DestructionCount = 0;
@@ -30,7 +35,7 @@ namespace _2020_Project___Battleships
             // decide if create ships for CPU or for user
             if (Name == "CPU")
             {// create ships for CPU
-                for (int i = 0; i < 5; Ships[i] = i != 4 ? Ships[i] = Ship.CpuCreate(GameBoard.ArrayBoard, (int)Math.Ceiling((i + 4) / 2.0)) : Ships[i] = Ship.CpuCreate(GameBoard.ArrayBoard, 5), i++) GameBoard.PrintBoard();
+                for (int i = 0; i < 5; Ships[i] = i != 4 ? Ships[i] = Ship.CpuCreate(GameBoard.ArrayBoard, (int)Math.Ceiling((i + 4) / 2.0)) : Ships[i] = Ship.CpuCreate(GameBoard.ArrayBoard, 5), i++) ;
                 ; /* << REMOVE */
             }
             // create ships for user

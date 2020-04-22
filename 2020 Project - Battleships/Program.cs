@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading;
+using static _2020_Project___Battleships.Utils;
+using static System.ConsoleColor;
 
 namespace _2020_Project___Battleships
 {
@@ -30,30 +32,7 @@ namespace _2020_Project___Battleships
             return c % 10;
         }
         // *******
-
-
-
-
-
-        /* Generates new random int between two chosen numbers
-         * Just enter the range you want, NO NEED TO ADD 1 TO THE LAST ARGUMENT, the fn does it */
-        public static int GenerateRandInt(int min, int max)
-        {
-            Random rnd = new Random();
-            return rnd.Next(min, max + 1);
-        }
-        // GenerateRandomInt END //
-
-
-        /* Generates random bool and return true or false */
-        public static bool GenerateRandBool()
-        {
-            if (GenerateRandInt(0, 1) == 0)
-                return false;
-            else
-                return true;
-        }
-        // GenerateRandBool END //
+        
 
 
         /* COMMENT NEEDED */
@@ -71,7 +50,7 @@ namespace _2020_Project___Battleships
 
 
         /* COMMENT NEEDED */
-        static void Instructions() // Explains the game to the user
+        public static void Instructions() // Explains the game to the user
         {
             Console.WriteLine("The rules of the game:");
             Console.WriteLine("Each player receives a game board and five ships of varying lengths.");
@@ -81,6 +60,11 @@ namespace _2020_Project___Battleships
             Console.WriteLine("On your turn, input a letter and a number that identifies a row and column on your target array.");
             Console.WriteLine("Each shot will be marked on the grid with either 'x' which means your shot hit a target or '/' which means the shot missed your target");
             Console.WriteLine("The first player to sink all five of their opponent's ships wins the game.");
+
+            Console.WriteLine();
+
+            Console.WriteLine("Press ENTER to return");
+            Console.ReadKey();
         }
 
 
@@ -94,6 +78,9 @@ namespace _2020_Project___Battleships
             Thread.Sleep(1000);
             Title();
             Console.WriteLine("We glad that you here playing our game!");
+            Console.WriteLine();
+            Console.WriteLine("Press Any Key to continue");
+            Console.ReadKey();
 
             bool restart = true;
 
@@ -110,7 +97,7 @@ namespace _2020_Project___Battleships
             Console.WriteLine("credits... not to leizan!!");
             
 
-
+            
             
 
             
@@ -143,17 +130,7 @@ namespace _2020_Project___Battleships
 
             /*
             TO DO LIST:
-            - instructions: Ron
-            - destroying mechanism:
-                * Player : Ron
-                  - fire shot
-                * CPU : Eden
-                  - free shot V
-                  - search shot V*
-            - win condition: Ron
             - colors: Eden
-
-            - add info about the game!
 
 
             ---

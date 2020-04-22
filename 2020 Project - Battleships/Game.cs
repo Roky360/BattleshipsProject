@@ -1,12 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading;
+using static _2020_Project___Battleships.Player;
+using static _2020_Project___Battleships.Utils;
+using static System.ConsoleColor;
 
 namespace _2020_Project___Battleships
 {
     class Game
     {
-        public static Player[] Players { get; set; }            // The list of the players of the game (user, CPU)
+        public static Player[] Players { get; set; }            // The list of the players of the game (user, CPU)        
 
 
         // constructor
@@ -21,6 +23,67 @@ namespace _2020_Project___Battleships
 
         /* ==== General Functions ==== */
 
+        /* - Setup - */
+        public static Position Setup()
+        {
+            bool done = false;
+            Position boardSize = new Position(10, 10);
+
+
+            while (!done)
+            {
+                Console.Clear();
+                Console.WriteLine("Main Menu");
+                Console.WriteLine("---------");
+                Console.WriteLine("1- Start Game");
+                Console.WriteLine("2- Change Board Size");
+                Console.WriteLine("3- Read Instructions");
+                Console.WriteLine();
+                Console.Write("Please enter the desired option ");
+
+                char ans = Console.ReadKey().KeyChar;
+                switch (ans)
+                {
+                    // Start Game
+                    case '1': 
+                        done = true;
+                        Console.Clear();
+                        break;
+
+                    // Board size
+                    case '2': 
+                        int size = 10;
+                        bool isNumber = false;
+                        while (!isNumber || size < 5 || size > 20)
+                        {
+                            Console.Clear();
+                            Console.Write("Please enter the new size for row and column of the board, between 5-20 (10 is the recomended size): ");
+                            isNumber = int.TryParse(Console.ReadLine(), out size);
+                        }
+                        boardSize.Row = boardSize.Col = size;
+                        Console.WriteLine();
+                        Console.WriteLine("Board size changed successfuly!");
+                        Thread.Sleep(2000);
+                        Console.Clear();
+                        break;
+
+                    // Read Instructions
+                    case '3':
+                        Console.Clear();
+                        Program.Instructions();
+                        Console.Clear();
+                        break;
+
+                    default:
+                        break;
+                }//switch
+            }//while
+
+            return boardSize;
+        }
+        // Setup END //
+
+
         /* - Start Game -
          ~ Description: The function that runs the whole game.
          ~ after setting the players, this func manages the turn system, the shooting system and the win condition
@@ -29,26 +92,18 @@ namespace _2020_Project___Battleships
          */
         public static bool StartGame()
         {
-            /* \/ for testing \/ */
-            for (int i = 0; i < 30; i++)
-            {
-                CpuTurn();
-                Players[0].GameBoard.PrintBoard();
-                Console.ReadKey();
-                Console.Clear();
-            }
 
             while (true)
             {
-                CpuTurn();
+                UserTurn();
                 IsSankCheck();
                 if (WinCondition())
                     break;
 
-                // userTurn();
+                CpuTurn();
                 IsSankCheck();
                 if (WinCondition())
-                    break;
+                    break;                
             }
 
             return AskRestart();
@@ -144,15 +199,14 @@ namespace _2020_Project___Battleships
          * If  not, it marks the spot for "missed" - '/'.
          > RETURNS: Boolean. If succeed to hit a ship, return that the attempt was successful (true), if not return that the attempt was failed (false)
          */
-        public static bool HitTry(Position hitCords)
+        public static bool HitTry(Position hitCords, bool isPlayer)
         {
-            // defining variables to the player's attributes for shorter calling
-            Player plyr = Players[0]; //get the player data
+            Player plyr = isPlayer ? Players[1] : Players[0]; //get the player data
             char[,] hitBoard = plyr.GameBoard.ArrayBoard; //the player's board
             int row = hitCords.Row;
             int col = hitCords.Col;
-            Position lastHitCords = Players[1].LastHitCords;
-            Ship[] plyrShips = plyr.Ships;
+            Position lastHitCords = isPlayer ? Players[0].LastHitCords : Players[1].LastHitCords;
+            Ship[] shipsArray = plyr.Ships;
 
 
             /* checks if any ship has got hit
@@ -161,22 +215,23 @@ namespace _2020_Project___Battleships
              *      sets the hitCondition variable to 4 (for the search shot to act next turn)
              * NO:  sets the slot in the array to the agreed mark of "missed" - /
              */
-            switch (hitBoard[row, col])
+            if (hitBoard[row, col] >= '0' && hitBoard[row, col] <= '9')
             {
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                    plyrShips[hitBoard[row, col] - 48].RemainParts--;
-                    hitBoard[row, col] = 'x';
-                    lastHitCords.CopyAttributes(hitCords);
-                    return true;
-
-                default:
-                    hitBoard[row, col] = '/';
-                    return false;
+                if (isPlayer)
+                {
+                    shipsArray[hitBoard[row, col] - 53].RemainParts--;
+                }
+                else
+                {
+                    shipsArray[hitBoard[row, col] - 48].RemainParts--;
+                }
+                hitBoard[row, col] = 'x';
+                lastHitCords.CopyAttributes(hitCords);
+                return true;
             }
+            // missed
+            hitBoard[row, col] = '/';
+            return false;
         }
         // HitTry END //
 
@@ -191,14 +246,15 @@ namespace _2020_Project___Battleships
         public static void CpuTurn()
         {
             int hitCondition = Players[1].HitCondition;
+            bool successfulHit;
 
-
+            // Decides wich kind of shot to execute based on the hitCondition
             if (hitCondition > 0)
             {
-                SearchShot();
+                successfulHit = SearchShot();
                 if (Players[1].HitCondition == 0)
                 {
-                    FreeShot();
+                    successfulHit = FreeShot();
                 }
                 else if (hitCondition == -1)
                 {
@@ -207,8 +263,24 @@ namespace _2020_Project___Battleships
             }
             else
             {
-                FreeShot();
+                successfulHit = FreeShot();
             }
+            
+            // After hit message to the user
+            if (successfulHit)
+            {
+                Players[0].GameBoard.PrintBoard();
+                Console.WriteLine("You got hit by the CPU!");
+            }
+            else
+            {
+                Players[0].GameBoard.PrintBoard();
+                Console.WriteLine("The CPU missed!");
+            }
+
+            Console.WriteLine("Press ENTER to continue");
+            Console.ReadKey();
+            Console.Clear();
         }
         // CpuTurn END //
 
@@ -216,27 +288,30 @@ namespace _2020_Project___Battleships
         /* - Free Shot - COMMENT NEEDED
          * 
          */
-        public static void FreeShot()
+        public static bool FreeShot()
         {
-            Console.WriteLine("free Shot");
             Player plyr = Players[0];
             char[,] hitBoard = plyr.GameBoard.ArrayBoard;
             // random hitting position
-            Position hitCords = new Position(Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1), Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1));
+            Position hitCords = new Position(GenerateRandInt(0, hitBoard.GetLength(0) - 1), GenerateRandInt(0, hitBoard.GetLength(0) - 1));
 
 
             // if the spot is already been hit, regenerage spot.
             while (hitBoard[hitCords.Row, hitCords.Col] == 'x' || hitBoard[hitCords.Row, hitCords.Col] == '/')
             {
-                hitCords.Col = Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1);
-                hitCords.Row = Program.GenerateRandInt(0, hitBoard.GetLength(0) - 1);
+                hitCords.Col = GenerateRandInt(0, hitBoard.GetLength(0) - 1);
+                hitCords.Row = GenerateRandInt(0, hitBoard.GetLength(0) - 1);
             }
 
-            if (HitTry(hitCords))
+            if (HitTry(hitCords, false))
             {
                 Players[1].HitCondition = 4;
                 Players[1].DestructionCount = 1;
+                Players[1].LastHitColor.CopyAttributes(hitCords);
+                return true;
             }
+            Players[1].LastHitColor.CopyAttributes(hitCords);
+            return false;
         }
         // FreeShot END //
 
@@ -255,9 +330,8 @@ namespace _2020_Project___Battleships
          * MISSED SHOT - Marks '/' in the array board.
          > RETURNS: Nothing.
          */
-        public static void SearchShot()
+        public static bool SearchShot()
         {
-            Console.WriteLine("free Shot");
             // Defining the needed variables
             int hitCondition = Players[1].HitCondition;
             Position lastHitCords = new Position(Players[1].LastHitCords.Row, Players[1].LastHitCords.Col); //create the object for the last hit position
@@ -288,10 +362,7 @@ namespace _2020_Project___Battleships
                         break;       
                 }
                 if (hitCondition == 0) // if hitCondition is 0 - exit the search shot.
-                {
-                    Console.WriteLine("ALERT: HIT CONDITION < 0"); /* << DEBUGGUNG ALERT, REMOVE WHEN NOT NEEDED */
                     break;
-                }
 
                 if (lastHitCords.Row >= 0 && lastHitCords.Row <= hitBoard.GetLength(0) - 1 && lastHitCords.Col >= 0 && lastHitCords.Col <= hitBoard.GetLength(1) - 1) // boundaries check
                 {
@@ -304,7 +375,7 @@ namespace _2020_Project___Battleships
                             break;
 
                         default: // if not occupied, try to hit
-                            if (HitTry(lastHitCords)) // if succeeded, wil save the cords for the next turn
+                            if (HitTry(lastHitCords, false)) // if succeeded, wil save the cords for the next turn
                             {
                                 Players[1].LastHitCords.CopyAttributes(lastHitCords);
                                 destructionCount++;
@@ -339,9 +410,15 @@ namespace _2020_Project___Battleships
             if (!successHit)
             {
                 Players[1].LastHitCords.CopyAttributes(tempCords);
+                Players[1].HitCondition = hitCondition;
+                Players[1].DestructionCount = destructionCount;
+                Players[1].LastHitColor.CopyAttributes(tempCords);
+                return false;
             }                        
             Players[1].HitCondition = hitCondition;
             Players[1].DestructionCount = destructionCount;
+            Players[1].LastHitColor.CopyAttributes(lastHitCords);
+            return true;
         }
         // SearchShot END //
 
@@ -350,6 +427,48 @@ namespace _2020_Project___Battleships
 
         /* ==== User ==== */
 
+        public static void UserTurn()
+        {
+            Position hitPos = new Position(0, 0);
+            char[,] CPUboard = Players[1].GameBoard.ArrayBoard;
+
+
+            Console.WriteLine("It's your turn!");
+            Console.WriteLine("---------------");
+            Console.WriteLine();
+            Players[1].GameBoard.PrintBoard();
+            Console.WriteLine("Please enter hitting cords:");
+
+            hitPos.Row = Ship.GetRowFromUser(CPUboard);
+            hitPos.Col = Ship.GetColFromUsers(CPUboard);
+            // convert the char from the Fn to a number in the bounds of the array
+            if (hitPos.Row > 'Z')
+            {// small
+                hitPos.Row -= 97;
+            }
+            else
+            {// capital
+                hitPos.Row -= 65;
+            }
+
+            Console.Clear();
+
+            if (HitTry(hitPos, true))
+            {
+                Players[1].GameBoard.PrintBoard();
+                Console.WriteLine("You hit a CPU's ship!");
+            }
+            else
+            {
+                Players[1].GameBoard.PrintBoard();
+                Console.WriteLine("You missed!");
+            }
+
+            Console.WriteLine("Pres ENTER to end the turn");
+            Console.ReadKey();
+            Console.Clear();
+            Players[0].LastHitColor.CopyAttributes(hitPos);
+        }
 
 
     }

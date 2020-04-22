@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using static _2020_Project___Battleships.Utils;
 
 namespace _2020_Project___Battleships
 {
@@ -31,13 +30,13 @@ namespace _2020_Project___Battleships
         /* ==== User ==== */
 
         /* COMMENT NEEDED */
-        private static char GetRowFromUser(char[,] board)
+        public static char GetRowFromUser(char[,] board)
         {
             Console.Write("Row = ");
             char rowUser = Console.ReadKey().KeyChar;
             Console.WriteLine();
 
-            while ((rowUser < 'A' || rowUser > 'Z') && (rowUser < 'a' || rowUser > 'z'))
+            while ((rowUser < 'A' || rowUser > board.GetLength(0) + 64) && (rowUser < 'a' || rowUser > board.GetLength(0) + 96))
             {
                 Console.WriteLine($"The input to the row selection must be a letter (small or capital) between A-{(char)(board.GetLength(0) + 64)}. Please reenter");
                 Console.Write("Row = ");
@@ -50,7 +49,7 @@ namespace _2020_Project___Battleships
 
 
         /* COMMENT NEEDED */
-        private static int GetColFromUsers(char[,] board)
+        public static int GetColFromUsers(char[,] board)
         {
             int col;
             
@@ -287,8 +286,8 @@ namespace _2020_Project___Battleships
 
             while (!buildable)
             {
-                cpuPos = new Position(Program.GenerateRandInt(0, board.GetLength(0) - 1), Program.GenerateRandInt(0, board.GetLength(1) - 1));
-                horizontal = Program.GenerateRandBool();
+                cpuPos = new Position(GenerateRandInt(0, board.GetLength(0) - 1), GenerateRandInt(0, board.GetLength(1) - 1));
+                horizontal = GenerateRandBool();
 
                 // building checks with new values
                 boundariesCheck = BoundariesCheck(board, cpuPos, horizontal, length);
