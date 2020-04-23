@@ -433,22 +433,22 @@ namespace _2020_Project___Battleships
             char[,] CPUboard = Players[1].GameBoard.ArrayBoard;
 
 
-            Console.WriteLine("It's your turn!");
-            Console.WriteLine("---------------");
+            Console.WriteLine("It's Your Turn");
+            Console.WriteLine("--------------");
             Console.WriteLine();
             Players[1].GameBoard.PrintBoard();
             Console.WriteLine("Please enter hitting cords:");
 
             hitPos.Row = Ship.GetRowFromUser(CPUboard);
             hitPos.Col = Ship.GetColFromUsers(CPUboard);
-            // convert the char from the Fn to a number in the bounds of the array
+            // convert the char from the GetRow Fn to a number in the bounds of the array
             if (hitPos.Row > 'Z')
             {// small
-                hitPos.Row -= 97;
+                hitPos.Row -= 'a';
             }
             else
             {// capital
-                hitPos.Row -= 65;
+                hitPos.Row -= 'A';
             }
 
             Console.Clear();
@@ -464,12 +464,12 @@ namespace _2020_Project___Battleships
                 Console.WriteLine("You missed!");
             }
 
-            Console.WriteLine("Pres ENTER to end the turn");
+            Console.WriteLine("Press ENTER to end the turn");
             Console.ReadKey();
             Console.Clear();
             Players[0].LastHitColor.CopyAttributes(hitPos);
         }
-
+        
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using static _2020_Project___Battleships.Game;
 using static _2020_Project___Battleships.Utils;
 using static System.ConsoleColor;
 
@@ -52,16 +53,16 @@ namespace _2020_Project___Battleships
 
             // print board index - numbers
             Console.Write("  ");
-
-            if (Name == "CPU")
+            for (int i = 0; i < board.GetLength(0); i++)
             {
-                CpuMainBoardPrint();
+                FGcolor(DarkGray);
+                Console.Write("| ");
+                FGcolor(Gray);
+                Console.Write(i + " ");
             }
-            else UserMainBoardPrint();
-
             FGcolor(DarkGray);
             Console.WriteLine("|");
-            FGcolor(DarkGray);
+            FGcolor(Gray);
 
             // underline
             Console.Write("  ");
@@ -70,18 +71,11 @@ namespace _2020_Project___Battleships
             FGcolor(Gray);
             Console.WriteLine();
 
-
-            for (int i = 0; i < board.GetLength(0); i++) // print board index - characters
+            if (Name == "CPU")
             {
-                Console.Write((char)('A' + i) + " ");
-                
-                FGcolor(DarkGray);
-                Console.WriteLine("|");
-                for (int j = 0; j < board.GetLength(0) * 4 + 2; Console.Write("-"), j++) ;
-                Console.WriteLine();
-                FGcolor(Gray);
+                CpuMainBoardPrint();
             }
-            Console.WriteLine();            
+            else UserMainBoardPrint();
         }
         // PrintBoard END //
 
@@ -89,165 +83,170 @@ namespace _2020_Project___Battleships
         private void CpuMainBoardPrint()
         {
             char[,] board = ArrayBoard;
-            //Game.Players[0].LastHitColor = new Position(-1, -1); // starting values
-            Position userHitColor = new Position(0, 0);
-            userHitColor.CopyAttributes(Game.Players[0].LastHitColor);
+            Position userHitColor = new Position(-1, -1); // starting values, in case that the LastHitColor is null
+            if (Players != null && Players[0] != null)
+            {
+                userHitColor.CopyAttributes(Players[0].LastHitColor);
+            }
 
 
             for (int i = 0; i < board.GetLength(0); i++)
             {
+                // print board index - letters
+                Console.Write((char)('A' + i) + " ");
+
                 for (int j = 0; j < board.GetLength(1); j++) // print the board
                 {
-                    // Missed - '/' | Red & Dark Red
                     if (i == userHitColor.Row && j == userHitColor.Col)
                     {
-                        Console.Write("|");
-                        BGcolor(DarkRed);
-                        Console.Write("   ");
-                        BGcolor(Black);
-                    }
-                    else
-                    if (board[i, j] == '/')
-                    {
-                        Console.Write("|");
-                        BGcolor(Red);
-                        Console.Write("   ");
-                        BGcolor(Black);
-                    }
+                        switch (board[i, j])
+                        {
+                            case '/':
+                                Console.Write("| ");
+                                BGcolor(Red);
+                                Console.Write(" ");
+                                BGcolor(Black);
+                                Console.Write(" ");
+                                break;
 
-                    // Hit - 'x' | Green & Dark Green
+                            case 'x':
+                                FGcolor(DarkGray);
+                                Console.Write("| ");
+                                FGcolor(Green);
+                                Console.Write(board[i, j] + " ");
+                                FGcolor(Gray);
+                                break;
+                        }//switch
+                    }//if hitColor = board Position
                     else
-                    if (i == userHitColor.Row && j == userHitColor.Col)
                     {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        FGcolor(DarkGreen);
-                        Console.Write(board[i, j] + " ");
-                        FGcolor(Gray);
+                        // Missed '/' | Red BG
+                        if (board[i, j] == '/')
+                        {
+                            Console.Write("|");
+                            BGcolor(DarkRed);
+                            Console.Write(" ");
+                            BGcolor(Black);
+                        }
+                        else // Hit 'x' | Dark Green FG
+                        if (board[i, j] == 'x')
+                        {
+                            FGcolor(DarkGray);
+                            Console.Write("| ");
+                            FGcolor(DarkGreen);
+                            Console.Write(board[i, j] + " ");
+                            FGcolor(Gray);
+                        }
+                        else // CPU's Ships '5-9' | Hidden (null)
+                        if (board[i, j] >= '5' && board[i, j] <= '9')
+                        {
+                            FGcolor(DarkGray);
+                            Console.Write("|   ");
+                        }
+                        else // null slot | null
+                        {
+                            FGcolor(DarkGray);
+                            Console.Write("|   ");
+                            FGcolor(Gray);
+                        }
                     }
-                    else
-                    if (board[i, j] == 'x')
-                    {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        FGcolor(Green);
-                        Console.Write(board[i, j] + " ");
-                        FGcolor(Gray);
-                    }
+                }//for j (rows)
 
-                    // Player's Ship - Dark Cyan
-                    else
-                    if (board[i, j] >= '0' && board[i, j] <= '4')
-                    {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        FGcolor(DarkCyan);
-                        Console.Write(board[i, j] + " ");
-                    }
-                    else if (board[i, j] >= '5' && board[i, j] <= '9')
-                    {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        Console.Write("  ");
-                    }
-                    else // null
-                    {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        FGcolor(Gray);
-                        Console.Write(board[i, j] + " ");
-                    }
-                }
-
+                // Print underline between the lines
                 FGcolor(DarkGray);
-                Console.Write("| ");
+                Console.WriteLine("|");
+                for (int j = 0; j < board.GetLength(0) * 4 + 2; Console.Write("-"), j++) ;
+                Console.WriteLine();
                 FGcolor(Gray);
-                Console.Write(i + " ");
-            }            
+            }//for i (columns)
         }
-        // MainBoardPrint END //
+        // CpuMainBoardPrint END //
 
 
         private void UserMainBoardPrint()
         {
             char[,] board = ArrayBoard;
-            //Game.Players[1].LastHitColor = new Position(-1, -1); // starting values
-            Position cpuHitColor = new Position(0, 0);
-            cpuHitColor.CopyAttributes(Game.Players[1].LastHitColor);
+            Position cpuHitColor = new Position(-1, -1); // starting values, in case that the LastHitColor is null
+            if (Players != null && Players[1] != null)
+            {
+                cpuHitColor.CopyAttributes(Players[1].LastHitColor);
+            }
 
 
             for (int i = 0; i < board.GetLength(0); i++)
             {
+                // print board index - letters
+                Console.Write((char)('A' + i) + " ");
+
                 for (int j = 0; j < board.GetLength(1); j++) // print the board
                 {
-                    // Missed - '/' | Red & Dark Red
                     if (i == cpuHitColor.Row && j == cpuHitColor.Col)
                     {
-                        Console.Write("|");
-                        BGcolor(DarkRed);
-                        Console.Write("   ");
-                        BGcolor(Black);
-                    }
-                    else
-                    if (board[i, j] == '/')
-                    {
-                        Console.Write("|");
-                        BGcolor(Red);
-                        Console.Write("   ");
-                        BGcolor(Black);
-                    }
+                        switch (board[i, j])
+                        {
+                            case '/':
+                                Console.Write("| ");
+                                BGcolor(Gray);
+                                Console.Write(" ");
+                                BGcolor(Black);
+                                Console.Write(" ");
+                                break;
 
-                    // Hit - 'x' | Green & Dark Green
+                            case 'x':
+                                FGcolor(DarkGray);
+                                Console.Write("| ");
+                                FGcolor(Red);
+                                Console.Write(board[i, j] + " ");
+                                FGcolor(Gray);
+                                break;
+                        }//switch
+                    }//if hitColor = board Position
                     else
-                    if (i == cpuHitColor.Row && j == cpuHitColor.Col)
                     {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        FGcolor(DarkGreen);
-                        Console.Write(board[i, j] + " ");
-                        FGcolor(Gray);
+                        // Missed '/' | Dark Gray BG
+                        if (board[i, j] == '/')
+                        {
+                            Console.Write("|");
+                            BGcolor(DarkGray);
+                            Console.Write(" ");
+                            BGcolor(Black);
+                        }
+                        else // Hit 'x' | Dark Red FG
+                        if (board[i, j] == 'x')
+                        {
+                            FGcolor(DarkGray);
+                            Console.Write("| ");
+                            FGcolor(DarkRed);
+                            Console.Write(board[i, j] + " ");
+                            FGcolor(Gray);
+                        }
+                        else // Player's Ship | Dark Cyan FG
+                        if (board[i, j] >= '0' && board[i, j] <= '4')
+                        {
+                            FGcolor(DarkGray);
+                            Console.Write("| ");
+                            FGcolor(DarkCyan);
+                            Console.Write(board[i, j] + " ");
+                        }
+                        else // null slot | null
+                        {
+                            FGcolor(DarkGray);
+                            Console.Write("|   ");
+                            FGcolor(Gray);
+                        }
                     }
-                    else
-                    if (board[i, j] == 'x')
-                    {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        FGcolor(Green);
-                        Console.Write(board[i, j] + " ");
-                        FGcolor(Gray);
-                    }
+                    
+                }//for j (rows)
 
-                    // Player's Ship - Dark Cyan
-                    else
-                    if (board[i, j] >= '0' && board[i, j] <= '4')
-                    {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        FGcolor(DarkCyan);
-                        Console.Write(board[i, j] + " ");
-                    }
-                    else if (board[i, j] >= '5' && board[i, j] <= '9')
-                    {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        Console.Write("  ");
-                    }
-                    else // null
-                    {
-                        FGcolor(DarkGray);
-                        Console.Write("| ");
-                        FGcolor(Gray);
-                        Console.Write(board[i, j] + " ");
-                    }
-                }
-
+                // Print underline between the lines
                 FGcolor(DarkGray);
-                Console.Write("| ");
+                Console.WriteLine("|");
+                for (int j = 0; j < board.GetLength(0) * 4 + 2; Console.Write("-"), j++) ;
+                Console.WriteLine();
                 FGcolor(Gray);
-                Console.Write(i + " ");
-            }
+            }//for i (columns)            
         }
-        // MainBoardPrint END //
+        // UserMainBoardPrint END //
 
 
     }

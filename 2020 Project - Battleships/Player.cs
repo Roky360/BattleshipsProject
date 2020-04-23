@@ -25,9 +25,7 @@ namespace _2020_Project___Battleships
                 boardSize = Game.Setup();
             GameBoard = new Board(Name, boardSize);
             Ships = new Ship[5];
-            LastHitColor = new Position(2, 2);  // ****
-            LastHitColor.ToString();
-            Console.ReadKey();
+            LastHitColor = new Position(0, 0);
             HitCondition = 0;
             LastHitCords = new Position(0, 0);
             DestructionCount = 0;
