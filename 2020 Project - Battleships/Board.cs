@@ -84,6 +84,7 @@ namespace _2020_Project___Battleships
         {
             char[,] board = ArrayBoard;
             Position userHitColor = new Position(-1, -1); // starting values, in case that the LastHitColor is null
+            // check if the LastHitColor of the player is empty so the program will not crush from the Player object being empty
             if (Players != null && Players[0] != null)
             {
                 userHitColor.CopyAttributes(Players[0].LastHitColor);
@@ -102,6 +103,7 @@ namespace _2020_Project___Battleships
                         switch (board[i, j])
                         {
                             case '/':
+                                FGcolor(DarkGray);
                                 Console.Write("| ");
                                 BGcolor(Red);
                                 Console.Write(" ");
@@ -114,7 +116,6 @@ namespace _2020_Project___Battleships
                                 Console.Write("| ");
                                 FGcolor(Green);
                                 Console.Write(board[i, j] + " ");
-                                FGcolor(Gray);
                                 break;
                         }//switch
                     }//if hitColor = board Position
@@ -123,10 +124,12 @@ namespace _2020_Project___Battleships
                         // Missed '/' | Red BG
                         if (board[i, j] == '/')
                         {
-                            Console.Write("|");
+                            FGcolor(DarkGray);
+                            Console.Write("| ");
                             BGcolor(DarkRed);
                             Console.Write(" ");
                             BGcolor(Black);
+                            Console.Write(" ");
                         }
                         else // Hit 'x' | Dark Green FG
                         if (board[i, j] == 'x')
@@ -135,19 +138,17 @@ namespace _2020_Project___Battleships
                             Console.Write("| ");
                             FGcolor(DarkGreen);
                             Console.Write(board[i, j] + " ");
-                            FGcolor(Gray);
-                        }
+                        }/*
                         else // CPU's Ships '5-9' | Hidden (null)
                         if (board[i, j] >= '5' && board[i, j] <= '9')
                         {
                             FGcolor(DarkGray);
                             Console.Write("|   ");
-                        }
+                        }*/
                         else // null slot | null
                         {
                             FGcolor(DarkGray);
                             Console.Write("|   ");
-                            FGcolor(Gray);
                         }
                     }
                 }//for j (rows)
@@ -167,6 +168,7 @@ namespace _2020_Project___Battleships
         {
             char[,] board = ArrayBoard;
             Position cpuHitColor = new Position(-1, -1); // starting values, in case that the LastHitColor is null
+            // check if the LastHitColor of the player is empty so the program will not crush from the Player object being empty
             if (Players != null && Players[1] != null)
             {
                 cpuHitColor.CopyAttributes(Players[1].LastHitColor);
@@ -184,7 +186,9 @@ namespace _2020_Project___Battleships
                     {
                         switch (board[i, j])
                         {
+                            // Missed Last Turn | Gray BG
                             case '/':
+                                FGcolor(DarkGray);
                                 Console.Write("| ");
                                 BGcolor(Gray);
                                 Console.Write(" ");
@@ -192,12 +196,12 @@ namespace _2020_Project___Battleships
                                 Console.Write(" ");
                                 break;
 
+                            // Hit Last Turn | Red FG
                             case 'x':
                                 FGcolor(DarkGray);
                                 Console.Write("| ");
                                 FGcolor(Red);
-                                Console.Write(board[i, j] + " ");
-                                FGcolor(Gray);
+                                Console.Write(board[i, j] + " ");                                
                                 break;
                         }//switch
                     }//if hitColor = board Position
@@ -206,10 +210,12 @@ namespace _2020_Project___Battleships
                         // Missed '/' | Dark Gray BG
                         if (board[i, j] == '/')
                         {
-                            Console.Write("|");
+                            FGcolor(DarkGray);
+                            Console.Write("| ");
                             BGcolor(DarkGray);
                             Console.Write(" ");
                             BGcolor(Black);
+                            Console.Write(" ");
                         }
                         else // Hit 'x' | Dark Red FG
                         if (board[i, j] == 'x')
@@ -218,7 +224,6 @@ namespace _2020_Project___Battleships
                             Console.Write("| ");
                             FGcolor(DarkRed);
                             Console.Write(board[i, j] + " ");
-                            FGcolor(Gray);
                         }
                         else // Player's Ship | Dark Cyan FG
                         if (board[i, j] >= '0' && board[i, j] <= '4')
@@ -232,7 +237,6 @@ namespace _2020_Project___Battleships
                         {
                             FGcolor(DarkGray);
                             Console.Write("|   ");
-                            FGcolor(Gray);
                         }
                     }
                     

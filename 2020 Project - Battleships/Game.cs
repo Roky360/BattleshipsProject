@@ -23,8 +23,8 @@ namespace _2020_Project___Battleships
 
         /* ==== General Functions ==== */
 
-        /* - Setup - */
-        public static Position Setup()
+        /* - MainMenu - */
+        public static Position MainMenu()
         {
             bool done = false;
             Position boardSize = new Position(10, 10);
@@ -33,15 +33,11 @@ namespace _2020_Project___Battleships
             while (!done)
             {
                 Console.Clear();
-                Console.WriteLine("Main Menu");
-                Console.WriteLine("---------");
-                Console.WriteLine("1- Start Game");
-                Console.WriteLine("2- Change Board Size");
-                Console.WriteLine("3- Read Instructions");
-                Console.WriteLine();
-                Console.Write("Please enter the desired option ");
+                MenuPrint();
 
                 char ans = Console.ReadKey().KeyChar;
+
+
                 switch (ans)
                 {
                     // Start Game
@@ -51,20 +47,8 @@ namespace _2020_Project___Battleships
                         break;
 
                     // Board size
-                    case '2': 
-                        int size = 10;
-                        bool isNumber = false;
-                        while (!isNumber || size < 5 || size > 20)
-                        {
-                            Console.Clear();
-                            Console.Write("Please enter the new size for row and column of the board, between 5-20 (10 is the recomended size): ");
-                            isNumber = int.TryParse(Console.ReadLine(), out size);
-                        }
-                        boardSize.Row = boardSize.Col = size;
-                        Console.WriteLine();
-                        Console.WriteLine("Board size changed successfuly!");
-                        Thread.Sleep(2000);
-                        Console.Clear();
+                    case '2':
+                        boardSize = BoardSizeSet();
                         break;
 
                     // Read Instructions
@@ -81,7 +65,60 @@ namespace _2020_Project___Battleships
 
             return boardSize;
         }
-        // Setup END //
+        // MainMenu END //
+
+
+        private static void MenuPrint()
+        {
+            const int linesLength = 30;
+
+
+            FGcolor(White);
+            AlignedText("Main Menu", 31);
+            AlignedText("---------", 31);
+
+            CrossLine(linesLength);
+            Console.WriteLine("1- Start Game");
+            CrossLine(linesLength);
+            Console.WriteLine("2- Change Board Size");
+            CrossLine(linesLength);
+            Console.WriteLine("3- Read Instructions");
+            CrossLine(linesLength);
+            
+            Console.WriteLine();
+
+            FGcolor(DarkGray);
+            Console.Write("Please type the desired option ");
+        }
+
+
+        private static Position BoardSizeSet()
+        {
+            int size = 10;
+            bool isNumber = false;
+            Position boardSize = new Position(10, 10);
+
+
+            while (!isNumber || size < 5 || size > 10)
+            {
+                Console.Clear();
+                FGcolor(White);
+                Console.WriteLine("Please enter the new size for row and column of the board, between 5-10 (10 is the recomended size):");
+                InputLine(4);
+                isNumber = int.TryParse(Console.ReadLine(), out size);
+                BGcolor(Black);
+            }
+            boardSize.Row = boardSize.Col = size;
+
+            Console.WriteLine();
+            SystemMsg();
+            FGcolor(Green);
+            Console.WriteLine("Board size changed successfuly!");
+            Thread.Sleep(2000);
+            Console.Clear();
+
+            return boardSize;
+        }
 
 
         /* - Start Game -
@@ -237,7 +274,6 @@ namespace _2020_Project___Battleships
 
 
 
-
         /* ==== CPU ==== */
 
         /* - CPU Turn -  COMMENT NEEDED
@@ -250,7 +286,7 @@ namespace _2020_Project___Battleships
 
             // Decides wich kind of shot to execute based on the hitCondition
             if (hitCondition > 0)
-            {
+            { // Search Shot
                 successfulHit = SearchShot();
                 if (Players[1].HitCondition == 0)
                 {
@@ -261,7 +297,7 @@ namespace _2020_Project___Battleships
                     hitCondition = 0;
                 }
             }
-            else
+            else // hitCondition > 0 => Free Shot
             {
                 successfulHit = FreeShot();
             }
@@ -455,19 +491,20 @@ namespace _2020_Project___Battleships
 
             if (HitTry(hitPos, true))
             {
+                Players[0].LastHitColor.CopyAttributes(hitPos);
                 Players[1].GameBoard.PrintBoard();
                 Console.WriteLine("You hit a CPU's ship!");
             }
             else
             {
+                Players[0].LastHitColor.CopyAttributes(hitPos);
                 Players[1].GameBoard.PrintBoard();
                 Console.WriteLine("You missed!");
             }
 
             Console.WriteLine("Press ENTER to end the turn");
             Console.ReadKey();
-            Console.Clear();
-            Players[0].LastHitColor.CopyAttributes(hitPos);
+            Console.Clear();            
         }
         
 

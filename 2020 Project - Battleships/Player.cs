@@ -22,7 +22,7 @@ namespace _2020_Project___Battleships
             Name = name;
             Position boardSize = new Position(10, 10); // default values
             if (Name != "CPU")
-                boardSize = Game.Setup();
+                boardSize = Game.MainMenu();
             GameBoard = new Board(Name, boardSize);
             Ships = new Ship[5];
             LastHitColor = new Position(0, 0);

@@ -38,12 +38,19 @@ namespace _2020_Project___Battleships
         /* COMMENT NEEDED */
         static void Title()
         {
+            FGcolor(White);
             Console.WriteLine("─────────────────────────────────────────────────────────────────────────────   ");
+            FGcolor(Red);
             Console.WriteLine("╔════]     //\\    ═══╦═══ ═══╦═══ ╖     ╔═══  ╒═══╛ ╖     ╓ ╘═╦═╕ ╦═══╗ ╒═══╛  ");
+            FGcolor(Magenta);
             Console.WriteLine("║____/    //  \\      ║       ║    ║     ║     \\     ║     ║   ║   ║   ║ \\    ");
+            FGcolor(Blue);
             Console.WriteLine("║    \\   //--- \\     ║       ║    ║     ╠══    `═\\  ╠═════╣   ║   ╠═══╝  `═\\");
+            FGcolor(Cyan);
             Console.WriteLine("║    |  //      \\    ║       ║    ║     ║         \\ ║     ║   ║   ║         \\");
+            FGcolor(Green);
             Console.WriteLine("╚════┘ //        \\   ║       ║    ╚═══╛ ╚═══╛ ╘═══╛ ╜     ╙ ╘═╩═╕ ╜     ╘═══╛  ");
+            FGcolor(White);
             Console.WriteLine("──────────────────────────────────────────── By Ron Berkhof & Eden Shaked ───   ");
             Console.WriteLine();
         }
@@ -52,18 +59,32 @@ namespace _2020_Project___Battleships
         /* COMMENT NEEDED */
         public static void Instructions() // Explains the game to the user
         {
-            Console.WriteLine("The rules of the game:");
+            FGcolor(White);
+            Console.WriteLine("The Rules of the Game:");
+            Console.WriteLine("----------------------");
+
+            FGcolor(DarkCyan); Console.WriteLine("Pre Game");
+            FGcolor(Gray);
             Console.WriteLine("Each player receives a game board and five ships of varying lengths.");
             Console.WriteLine("Before the game starts, each opponent secretly places their own five ships on the game board array.");
-            Console.WriteLine("Each ship must be placed horizontally or vertically across array spaces—not diagonally—and the ships can't hang off the array. Ships can touch each other, but they can't occupy the same array space. You cannot change the position of the ships after the game begins.");
+            Console.WriteLine("Each ship must be placed horizontally or vertically across array spaces—not diagonally—and the ships can't hang off the array.");
+            Console.WriteLine("Ships can touch each other, but they can't occupy the same array space. You cannot change the position of the ships after the game begins.");
+
+            FGcolor(DarkCyan); Console.WriteLine("Game Play");
+            FGcolor(Gray);
             Console.WriteLine("Players take turns firing shots (by calling out an array coordinate) to attempt to hit the opponent's enemy ships.");
             Console.WriteLine("On your turn, input a letter and a number that identifies a row and column on your target array.");
-            Console.WriteLine("Each shot will be marked on the grid with either 'x' which means your shot hit a target or '/' which means the shot missed your target");
+            Console.WriteLine("Each shot will be marked on the grid with either 'x' which means your shot hit a target or colored rectangle which means the shot missed your target");
+
+            FGcolor(DarkCyan); Console.WriteLine("Wining");
+            FGcolor(Gray);
             Console.WriteLine("The first player to sink all five of their opponent's ships wins the game.");
+
+            FGcolor(DarkCyan); Console.WriteLine("Thats it, enjoy!");
 
             Console.WriteLine();
 
-            Console.WriteLine("Press ENTER to return");
+            FGcolor(DarkGray); Console.WriteLine("Press ENTER to return");
             Console.ReadKey();
         }
 
@@ -74,12 +95,15 @@ namespace _2020_Project___Battleships
 
         static void Main(string[] args)
         {
+            FGcolor(White);
             Console.WriteLine("Welcome to...");
             Thread.Sleep(1000);
             Title();
+            FGcolor(Gray);
             Console.WriteLine("We glad that you here playing our game!");
             Console.WriteLine();
-            Console.WriteLine("Press Any Key to continue");
+            FGcolor(DarkGray);
+            Console.WriteLine("Press ANY KEY to continue");
             Console.ReadKey();
 
             bool restart = true;
@@ -87,8 +111,16 @@ namespace _2020_Project___Battleships
             while (restart)
             {
                 Console.Clear();
-                Console.WriteLine("What is your name?");
+                
+                FGcolor(White);
+                string AskName = "What is your name?";
+                Console.WriteLine(AskName);
+                /*BGcolor(DarkCyan);
+                Console.Write("                 |");
+                Console.Write((char)13); Console.Write("|"); // print the "carriage return" character to return to the start of the line*/
+                InputLine(AskName.Length);
                 string usrName = Console.ReadLine();
+                BGcolor(Black);
                 _ = new Game(usrName);
                 restart = Game.StartGame();
             }
