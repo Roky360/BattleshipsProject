@@ -1,5 +1,6 @@
 ﻿using System;
 using static _2020_Project___Battleships.Utils;
+using static System.ConsoleColor;
 
 namespace _2020_Project___Battleships
 {
@@ -32,37 +33,53 @@ namespace _2020_Project___Battleships
         /* COMMENT NEEDED */
         public static char GetRowFromUser(char[,] board)
         {
+            // Get input
+            FGcolor(DarkGray);
             Console.Write("Row = ");
+            FGcolor(White);
             char rowUser = Console.ReadKey().KeyChar;
             Console.WriteLine();
 
+            // while the input not valid (a letter in the boundaries of the board)
             while ((rowUser < 'A' || rowUser > board.GetLength(0) + 64) && (rowUser < 'a' || rowUser > board.GetLength(0) + 96))
             {
+                ErrorSymbol();
                 Console.WriteLine($"The input to the row selection must be a letter (small or capital) between A-{(char)(board.GetLength(0) + 64)}. Please reenter");
+
+                FGcolor(DarkGray);
                 Console.Write("Row = ");
+                FGcolor(White);
                 rowUser = Console.ReadKey().KeyChar;
                 Console.WriteLine();
             }
-            
+
+            FGcolor(Gray);
             return rowUser;
         }
 
 
         /* COMMENT NEEDED */
-        public static int GetColFromUsers(char[,] board)
+        public static int GetColumnFromUsers(char[,] board)
         {
             int col;
-            
-            Console.Write("Column = ");
-            bool isNumberY = int.TryParse(Console.ReadLine(), out col);
 
-            while (!isNumberY || col < 0 || col > board.GetLength(1))
+            FGcolor(DarkGray);
+            Console.Write("Column = ");
+            FGcolor(White);
+            bool isNumberCol = int.TryParse(Console.ReadLine(), out col);
+
+            // Wrong input
+            while (!isNumberCol || col < 0 || col > board.GetLength(1) - 1)
             {
+                ErrorSymbol();
                 Console.WriteLine($"The input to the column selection must be a number between 0-{board.GetLength(1) - 1}. Please reenter");
+                FGcolor(DarkGray);
                 Console.Write("Column = ");
-                isNumberY = int.TryParse(Console.ReadLine(), out col);
+                FGcolor(White);
+                isNumberCol = int.TryParse(Console.ReadLine(), out col);
             }
 
+            FGcolor(Gray);
             return col;
         }
 
@@ -72,20 +89,13 @@ namespace _2020_Project___Battleships
          * return the values */
         private static Position GetPositionUser(char[,] board)
         {
+            FGcolor(Gray);
             Console.WriteLine($"Enter starting position: row- a letter (A-{(char)(board.GetLength(0) + 64)}), and column- a number (0-{board.GetLength(1) - 1}) like shown in your board.");
             
             int row = GetRowFromUser(board);
-            // convert the char from the Fn to a number in the bounds of the array
-            if (row > 'Z')
-            {// small
-                row -= 97;
-            }
-            else
-            {// capital
-                row -= 65;
-            }
+            row = LetterToNumber(row);
 
-            int col = GetColFromUsers(board);
+            int col = GetColumnFromUsers(board);
 
             Position usrPos = new Position(row, col);
             return usrPos;
@@ -100,20 +110,27 @@ namespace _2020_Project___Battleships
          * return true- horizontal , false- vertical */
         private static bool GetDirectionUser()
         {
+            FGcolor(DarkCyan);
             Console.WriteLine("Do you want the ship to be horizontally or vertically?");
+            FGcolor(Gray);
             Console.WriteLine("h - Horizontally");
             Console.WriteLine("v - Vertically");
 
             // input one character only
+            FGcolor(DarkGray);
             Console.Write("Direction: ");
+            FGcolor(White);
             char usrDirection = Console.ReadKey().KeyChar;
             Console.WriteLine();
 
             // checking if the char is valid, if not tells the user to reenter
             while (usrDirection != 'h' && usrDirection != 'v')
             {
+                ErrorSymbol();
                 Console.WriteLine("Input is not the letter 'h' or 'v'. Please reenter");
+                FGcolor(DarkGray);
                 Console.Write("Direction: ");
+                FGcolor(White);
                 usrDirection = Console.ReadKey().KeyChar;
                 Console.WriteLine();
             }
@@ -200,9 +217,11 @@ namespace _2020_Project___Battleships
 
 
             // Recieve input - starting Position and Direction
+            FGcolor(DarkCyan);
             Console.WriteLine($"Let's create a new ship in the length of {length}");
             // Position Get
             Position usrPos = GetPositionUser(board);
+            Console.WriteLine();
             // Direction Get
             bool horizontal = GetDirectionUser();
 
@@ -212,22 +231,28 @@ namespace _2020_Project___Battleships
             if (boundariesCheck)
             {
                 occupationCheck = OccupationCheck(board, usrPos, horizontal, length);
-                if (occupationCheck) buildable = true;
+                if (occupationCheck) 
+                    buildable = true;
             }
-            
+
             // If not buildable (the ship doesn't pass the boundaries or occupation check) - ask to rebuild
             while (!buildable)
             {
                 // explanation messages why the ship can not be built.
-                if (!boundariesCheck) // because of out of boundaries
+                if (!boundariesCheck) // out of boundaries
                 {
+                    ErrorSymbol();
                     Console.WriteLine("The values you entered cannot build a ship because it out of board boundaries. Please enter new values for the ship.");
+                    Console.WriteLine();
                 }
-                if (!occupationCheck) // because of other ship occupying the place(s)
+                if (!occupationCheck) // other ship occupying the slot(s)
                 {
+                    ErrorSymbol();
                     Console.WriteLine("The values you entered cannot build a ship because another ship is occupying some slots. Please enter new values for the ship.");
+                    Console.WriteLine();
                 }
 
+                // Get new position and direction values
                 usrPos = GetPositionUser(board);
                 horizontal = GetDirectionUser();
 
@@ -236,13 +261,15 @@ namespace _2020_Project___Battleships
                 if (boundariesCheck)
                 {
                     occupationCheck = OccupationCheck(board, usrPos, horizontal, length);
-                    if (occupationCheck) buildable = true;
+                    if (occupationCheck) 
+                        buildable = true;
                 }
             }
 
             // create the ship and mark it in the board
             Ship shipCreated = new Ship(usrPos, horizontal, length);
 
+            // Occupy the ship slots in the board array
             if (horizontal)
             {
                 for (int i = 0; i < length; i++)
@@ -259,8 +286,10 @@ namespace _2020_Project___Battleships
                 }
             }
 
+            Console.WriteLine();
 
             // successful msg and return the created ship.
+            SystemMsg();
             Console.WriteLine("Ship created successfuly!");
             Console.WriteLine();
             return shipCreated;

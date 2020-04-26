@@ -8,15 +8,20 @@ namespace _2020_Project___Battleships
 {
     class Game
     {
-        public static Player[] Players { get; set; }            // The list of the players of the game (user, CPU)        
+        public static Player[] Players { get; set; }                // The list of the players of the game (user, CPU)
+        public static Position BoardSize = new Position(10, 10);    // The size of the players' game board (default value: 10 by 10)
 
 
         // constructor
-        public Game(string usrName)
+        public Game(string userName)
         {
+            // Run the Main Menu for the player and set the chosen board size for both players
+            if (userName != CpuName)
+                BoardSize = MainMenu();
+
             Players = new Player[2];
-            Players[0] = new Player(usrName);
-            Players[1] = new Player("CPU");
+            Players[0] = new Player(userName);
+            Players[1] = new Player(CpuName);
         }
 
 
@@ -112,7 +117,6 @@ namespace _2020_Project___Battleships
 
             Console.WriteLine();
             SystemMsg();
-            FGcolor(Green);
             Console.WriteLine("Board size changed successfuly!");
             Thread.Sleep(2000);
             Console.Clear();
@@ -180,7 +184,9 @@ namespace _2020_Project___Battleships
             }
             if (cpuWinCondition)
             {
-                Console.WriteLine("The CPU has sunk all of your ships ! You lost");
+                FGcolor(DarkCyan);  Console.Write("The CPU has sunk all of your ships ! ");
+                FGcolor(Red);       Console.Write("You lost");
+                Console.WriteLine();
                 return true;
             }
 
@@ -194,7 +200,9 @@ namespace _2020_Project___Battleships
             }
             if (playerWinCondition)
             {
-                Console.WriteLine("You have sunken all the CPU's ships. Congratulations, you won !");
+                FGcolor(DarkCyan);  Console.WriteLine("You have sunken all the CPU's ships. ");
+                FGcolor(Green);     Console.WriteLine("Congratulations, you won !");
+                Console.WriteLine();
                 return true;
             }
 
@@ -206,16 +214,23 @@ namespace _2020_Project___Battleships
         public static bool AskRestart()
         {
             // asks the user if restart
-            Console.Write("Restart? [y/n] ");
+            FGcolor(White);     Console.Write("Restart? ");
+            FGcolor(DarkGray);  Console.WriteLine("[y/n]");
+            InputLine(1);
             char restartAns = Console.ReadKey().KeyChar;
+            BGcolor(Black);
             Console.WriteLine();
 
             // checking if the char is valid, if not tells the user to reenter
             while (restartAns != 'y' && restartAns != 'n')
-            {
+            {                
+                ErrorSymbol();
                 Console.WriteLine("The possible inputs are 'y'(yes) or 'n'(no). Please reenter");
-                Console.Write("[y/n] ");
+                FGcolor(DarkGray);
+                Console.WriteLine("[y/n] ");
+                InputLine(1);
                 restartAns = Console.ReadKey().KeyChar;
+                BGcolor(Black);
                 Console.WriteLine();
             }
 
@@ -284,6 +299,7 @@ namespace _2020_Project___Battleships
             int hitCondition = Players[1].HitCondition;
             bool successfulHit;
 
+
             // Decides wich kind of shot to execute based on the hitCondition
             if (hitCondition > 0)
             { // Search Shot
@@ -301,19 +317,29 @@ namespace _2020_Project___Battleships
             {
                 successfulHit = FreeShot();
             }
-            
-            // After hit message to the user
+
+            // Display the results to the user
+            FGcolor(White);
+            Console.WriteLine("CPU's Turn");
+            HyphenUnderline(length: 10);
+            Console.WriteLine();
+
             if (successfulHit)
             {
                 Players[0].GameBoard.PrintBoard();
-                Console.WriteLine("You got hit by the CPU!");
+                FGcolor(Gray);
+                Console.WriteLine($"The CPU shot at {Players[1].LastHitColor.ToString()} and hit one of your ships!");
             }
             else
             {
                 Players[0].GameBoard.PrintBoard();
-                Console.WriteLine("The CPU missed!");
+                FGcolor(Gray);
+                Console.WriteLine($"The CPU shot at {Players[1].LastHitColor.ToString()} and missed!");
             }
+            Console.WriteLine();
 
+
+            FGcolor(DarkGray);
             Console.WriteLine("Press ENTER to continue");
             Console.ReadKey();
             Console.Clear();
@@ -428,7 +454,6 @@ namespace _2020_Project___Battleships
                                 {
                                     hitCondition--;
                                 }
-                                //hitCondition = lastHitCords.Row - 2 < 0 || lastHitCords.Col - 2 < 0 ? hitCondition-- : hitBoard[lastHitCords.Row - 2, lastHitCords.Col - 2] == 'x' ? 0 : hitCondition--;
                             }
                             isPlayed = true; // mark as a played turn to exit the loop and pass the turn
                             break;
@@ -442,18 +467,15 @@ namespace _2020_Project___Battleships
             }//while end   
             
 
-            // apply the values from this Fn to the main variable in the outside.
-            if (!successHit)
-            {
-                Players[1].LastHitCords.CopyAttributes(tempCords);
-                Players[1].HitCondition = hitCondition;
-                Players[1].DestructionCount = destructionCount;
-                Players[1].LastHitColor.CopyAttributes(tempCords);
-                return false;
-            }                        
+            // Apply the values from this Fn to the CPU's attributes
             Players[1].HitCondition = hitCondition;
             Players[1].DestructionCount = destructionCount;
             Players[1].LastHitColor.CopyAttributes(lastHitCords);
+            if (!successHit)
+            { // if failed the shot, restore the hit cords from the tempCords and return false(- shot failed)
+                Players[1].LastHitCords.CopyAttributes(tempCords);
+                return false;
+            }
             return true;
         }
         // SearchShot END //
@@ -469,23 +491,33 @@ namespace _2020_Project___Battleships
             char[,] CPUboard = Players[1].GameBoard.ArrayBoard;
 
 
-            Console.WriteLine("It's Your Turn");
-            Console.WriteLine("--------------");
+            // Turn title print
+            string titleTxt = $"{Players[0].Name}'s Turn";
+            FGcolor(White);
+            Console.WriteLine(titleTxt);
+            HyphenUnderline(titleTxt.Length);
             Console.WriteLine();
-            Players[1].GameBoard.PrintBoard();
-            Console.WriteLine("Please enter hitting cords:");
 
+            Players[1].GameBoard.PrintBoard();
+            FGcolor(DarkCyan); Console.WriteLine("Please enter hitting cords:");
+
+            FGcolor(Red);
             hitPos.Row = Ship.GetRowFromUser(CPUboard);
-            hitPos.Col = Ship.GetColFromUsers(CPUboard);
-            // convert the char from the GetRow Fn to a number in the bounds of the array
-            if (hitPos.Row > 'Z')
-            {// small
-                hitPos.Row -= 'a';
-            }
-            else
-            {// capital
-                hitPos.Row -= 'A';
-            }
+            hitPos.Row = LetterToNumber(hitPos.Row);
+
+            hitPos.Col = Ship.GetColumnFromUsers(CPUboard);
+
+            // same hit spot alert
+            while (CPUboard[hitPos.Row, hitPos.Col] == 'x' || CPUboard[hitPos.Row, hitPos.Col] == '/')
+            {
+                ErrorSymbol();
+                Console.WriteLine("You already tried to hit in that spot. Please reenter");
+
+                hitPos.Row = Ship.GetRowFromUser(CPUboard);
+                hitPos.Row = LetterToNumber(hitPos.Row);
+
+                hitPos.Col = Ship.GetColumnFromUsers(CPUboard);                
+            }            
 
             Console.Clear();
 
@@ -502,6 +534,8 @@ namespace _2020_Project___Battleships
                 Console.WriteLine("You missed!");
             }
 
+            Console.WriteLine();
+            FGcolor(DarkGray);
             Console.WriteLine("Press ENTER to end the turn");
             Console.ReadKey();
             Console.Clear();            

@@ -1,4 +1,5 @@
 ﻿using System;
+using static _2020_Project___Battleships.Player;
 using static _2020_Project___Battleships.Game;
 using static _2020_Project___Battleships.Utils;
 using static System.ConsoleColor;
@@ -46,9 +47,12 @@ namespace _2020_Project___Battleships
          */
         public void PrintBoard()
         {
-            char[,] board = ArrayBoard;            
+            char[,] board = ArrayBoard;
 
 
+            // Decide in which color to print the title
+            if (Name == CpuName)  FGcolor(Red);   // CPU - Red
+            else                FGcolor(Cyan);  // User - Cyan
             Console.WriteLine($"{Name}'s Board:");
 
             // print board index - numbers
@@ -71,11 +75,13 @@ namespace _2020_Project___Battleships
             FGcolor(Gray);
             Console.WriteLine();
 
-            if (Name == "CPU")
+            if (Name == CpuName)
             {
                 CpuMainBoardPrint();
             }
             else UserMainBoardPrint();
+
+            Console.WriteLine();
         }
         // PrintBoard END //
 
@@ -138,13 +144,7 @@ namespace _2020_Project___Battleships
                             Console.Write("| ");
                             FGcolor(DarkGreen);
                             Console.Write(board[i, j] + " ");
-                        }/*
-                        else // CPU's Ships '5-9' | Hidden (null)
-                        if (board[i, j] >= '5' && board[i, j] <= '9')
-                        {
-                            FGcolor(DarkGray);
-                            Console.Write("|   ");
-                        }*/
+                        }
                         else // null slot | null
                         {
                             FGcolor(DarkGray);

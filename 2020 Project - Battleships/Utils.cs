@@ -31,6 +31,21 @@ namespace _2020_Project___Battleships
         // GenerateRandBool END //
 
 
+        public static int LetterToNumber(int num)
+        {
+            if (num > 'Z')
+            {// small
+                num -= 'a';
+            }
+            else
+            {// capital
+                num -= 'A';
+            }
+
+            return num;
+        }
+
+
 
         /* ==== Coloring & Design ==== */
 
@@ -63,6 +78,12 @@ namespace _2020_Project___Battleships
         }
 
 
+        public static void HyphenUnderline(int length)
+        {
+            for (int i = 0; i < length; Console.Write("-"), i++) ;
+        }
+
+
         public static void AlignedText(string txt, int LineLength)
         {
             for (int i = 0; i < (LineLength - txt.Length) / 2; Console.Write(" "), i++) ;
@@ -74,7 +95,7 @@ namespace _2020_Project___Battleships
         {
             FGcolor(DarkRed);
             Console.Write("[!] ");
-            FGcolor(Gray);
+            FGcolor(Red);
         }
 
 
@@ -82,7 +103,7 @@ namespace _2020_Project___Battleships
         {
             FGcolor(DarkGreen);
             Console.Write("[!] ");
-            FGcolor(Gray);
+            FGcolor(Green);
         }
 
 
