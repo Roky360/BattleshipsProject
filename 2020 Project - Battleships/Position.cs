@@ -31,7 +31,7 @@ namespace _2020_Project___Battleships
 
         public override string ToString()
         {
-            return $"{(char)(Row + 'A')}, {Col}";
+            return $"{(char)(Row + 'A')},{Col}";
         }
     }
 }

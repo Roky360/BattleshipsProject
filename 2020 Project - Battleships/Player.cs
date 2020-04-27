@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using static _2020_Project___Battleships.Utils;
 using static System.ConsoleColor;
 
@@ -11,6 +10,7 @@ namespace _2020_Project___Battleships
         public Board GameBoard { get; set; }                    // The game board of the player, where all his ships are
         public Ship[] Ships { get; set; }                       // Array that stores the player's ships
         public Position LastHitColor { get; set; }              // The last hit position for the coloring system
+        public bool IsLost { get; set; }                  // Whether or not the player won the game
         // Used for CPU only \/
         public const string CpuName = "CPU";
         public int HitCondition { get; set; }                   // hit condition of the CPU (direction where to hit next search shot)
@@ -26,6 +26,8 @@ namespace _2020_Project___Battleships
             GameBoard = new Board(Name, Game.BoardSize);
             Ships = new Ship[5];
             LastHitColor = new Position(0, 0);
+            IsLost = false;
+            // CPU
             HitCondition = 0;
             LastHitCords = new Position(0, 0);
             DestructionCount = 0;
@@ -42,17 +44,11 @@ namespace _2020_Project___Battleships
                     FGcolor(White);
                     Console.WriteLine("Ship Creation");
                     HyphenUnderline(length: 13);
-                    Console.WriteLine();
 
                     GameBoard.PrintBoard();
                     Ships[i] = i != 4 ? Ships[i] = Ship.UserCreate(GameBoard.ArrayBoard, (int)Math.Ceiling((i + 4) / 2.0)) : Ships[i] = Ship.UserCreate(GameBoard.ArrayBoard, 5);
-                    
-                    // continue message
-                    FGcolor(DarkGray);
-                    Console.Write("Press ENTER to continue");
-                    Console.ReadKey();
-                    Thread.Sleep(100);
-                    Console.Clear();
+
+                    PressEnterToContinue();
                 }
                 GameBoard.PrintBoard();
 
@@ -61,12 +57,7 @@ namespace _2020_Project___Battleships
                 Console.WriteLine("That's how your board looks like!");
                 Console.WriteLine();
 
-                // continue message
-                FGcolor(DarkGray);
-                Console.Write("Press ENTER to continue");
-                Console.ReadKey();
-                Thread.Sleep(100);
-                Console.Clear();
+                PressEnterToContinue();
             }
         }
 

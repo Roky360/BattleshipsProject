@@ -44,7 +44,7 @@ namespace _2020_Project___Battleships
             while ((rowUser < 'A' || rowUser > board.GetLength(0) + 64) && (rowUser < 'a' || rowUser > board.GetLength(0) + 96))
             {
                 ErrorSymbol();
-                Console.WriteLine($"The input to the row selection must be a letter (small or capital) between A-{(char)(board.GetLength(0) + 64)}. Please reenter");
+                Console.WriteLine($"The input to the row selection must be a letter (small or capital) between A to {(char)(board.GetLength(0) + 64)}. Please reenter");
 
                 FGcolor(DarkGray);
                 Console.Write("Row = ");
@@ -72,7 +72,7 @@ namespace _2020_Project___Battleships
             while (!isNumberCol || col < 0 || col > board.GetLength(1) - 1)
             {
                 ErrorSymbol();
-                Console.WriteLine($"The input to the column selection must be a number between 0-{board.GetLength(1) - 1}. Please reenter");
+                Console.WriteLine($"The input to the column selection must be a number between 0 to {board.GetLength(1) - 1}. Please reenter");
                 FGcolor(DarkGray);
                 Console.Write("Column = ");
                 FGcolor(White);
@@ -92,11 +92,14 @@ namespace _2020_Project___Battleships
             FGcolor(Gray);
             Console.WriteLine($"Enter starting position: row- a letter (A-{(char)(board.GetLength(0) + 64)}), and column- a number (0-{board.GetLength(1) - 1}) like shown in your board.");
             
+            // Get Row
             int row = GetRowFromUser(board);
             row = LetterToNumber(row);
 
+            // Get Column
             int col = GetColumnFromUsers(board);
 
+            // Create the position object
             Position usrPos = new Position(row, col);
             return usrPos;
         }
@@ -110,6 +113,7 @@ namespace _2020_Project___Battleships
          * return true- horizontal , false- vertical */
         private static bool GetDirectionUser()
         {
+            // Message the user
             FGcolor(DarkCyan);
             Console.WriteLine("Do you want the ship to be horizontally or vertically?");
             FGcolor(Gray);
@@ -117,29 +121,33 @@ namespace _2020_Project___Battleships
             Console.WriteLine("v - Vertically");
 
             // input one character only
-            FGcolor(DarkGray);
-            Console.Write("Direction: ");
-            FGcolor(White);
-            char usrDirection = Console.ReadKey().KeyChar;
-            Console.WriteLine();
+            char userDirection = GetDirectionInput();
 
-            // checking if the char is valid, if not tells the user to reenter
-            while (usrDirection != 'h' && usrDirection != 'v')
+            // Input Validation
+            while (userDirection != 'h' && userDirection != 'v')
             {
                 ErrorSymbol();
                 Console.WriteLine("Input is not the letter 'h' or 'v'. Please reenter");
-                FGcolor(DarkGray);
-                Console.Write("Direction: ");
-                FGcolor(White);
-                usrDirection = Console.ReadKey().KeyChar;
-                Console.WriteLine();
+                userDirection = GetDirectionInput();
             }
 
             // applying the chosen direction (char) to a variable and return it.
-            bool horizontal = usrDirection == 'h';
+            bool horizontal = userDirection == 'h';
             return horizontal;
         }
         // GetDirectionUser END //
+
+        private static char GetDirectionInput()
+        {
+            FGcolor(DarkGray);
+            Console.Write("Direction: ");
+
+            FGcolor(White);
+            char userDirectionInput = Console.ReadKey().KeyChar;
+            Console.WriteLine();
+
+            return userDirectionInput;
+        }
 
 
         /* Out of board boundaries checking
@@ -210,82 +218,41 @@ namespace _2020_Project___Battleships
         /* Creates a ship for the user */
         public static Ship UserCreate(char[,] board, int length)
         {
-            // Declaring the "building permits"
-            bool buildable = false;
-            bool boundariesCheck;
-            bool occupationCheck = true;
-
-
-            // Recieve input - starting Position and Direction
+            // Title
             FGcolor(DarkCyan);
             Console.WriteLine($"Let's create a new ship in the length of {length}");
-            // Position Get
-            Position usrPos = GetPositionUser(board);
+
+            // Get Position & Direction
+            Position shipStartingPos = GetPositionUser(board);
             Console.WriteLine();
-            // Direction Get
             bool horizontal = GetDirectionUser();
 
-            // run boundaries check first and if passed - run occupation check
-            // because if out of boundaries the occupation check will blow the program cause it using the array.
-            boundariesCheck = BoundariesCheck(board, usrPos, horizontal, length);
-            if (boundariesCheck)
-            {
-                occupationCheck = OccupationCheck(board, usrPos, horizontal, length);
-                if (occupationCheck) 
-                    buildable = true;
-            }
+            // Validation for the values from the user
+            Tuple<bool, bool, bool> buildingResults = IsBuildable(board, shipStartingPos, horizontal, length);
+            bool boundariesCheck = buildingResults.Item1;
+            bool occupationCheck = buildingResults.Item2;
+            bool buildable = buildingResults.Item3;
 
             // If not buildable (the ship doesn't pass the boundaries or occupation check) - ask to rebuild
             while (!buildable)
             {
-                // explanation messages why the ship can not be built.
-                if (!boundariesCheck) // out of boundaries
-                {
-                    ErrorSymbol();
-                    Console.WriteLine("The values you entered cannot build a ship because it out of board boundaries. Please enter new values for the ship.");
-                    Console.WriteLine();
-                }
-                if (!occupationCheck) // other ship occupying the slot(s)
-                {
-                    ErrorSymbol();
-                    Console.WriteLine("The values you entered cannot build a ship because another ship is occupying some slots. Please enter new values for the ship.");
-                    Console.WriteLine();
-                }
+                CreationErrorMsgs(boundariesCheck, occupationCheck);
 
                 // Get new position and direction values
-                usrPos = GetPositionUser(board);
+                shipStartingPos = GetPositionUser(board);
                 horizontal = GetDirectionUser();
 
                 // building checks with new values
-                boundariesCheck = BoundariesCheck(board, usrPos, horizontal, length);
-                if (boundariesCheck)
-                {
-                    occupationCheck = OccupationCheck(board, usrPos, horizontal, length);
-                    if (occupationCheck) 
-                        buildable = true;
-                }
+                Tuple<bool, bool, bool> newBuildingResults = IsBuildable(board, shipStartingPos, horizontal, length);
+                boundariesCheck = newBuildingResults.Item1;
+                occupationCheck = newBuildingResults.Item2;
+                buildable = newBuildingResults.Item3;
             }
 
             // create the ship and mark it in the board
-            Ship shipCreated = new Ship(usrPos, horizontal, length);
-
-            // Occupy the ship slots in the board array
-            if (horizontal)
-            {
-                for (int i = 0; i < length; i++)
-                {
-                    board[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
-                    usrPos.Col++;
-                }
-            }
-            else {
-                for (int i = 0; i < length; i++)
-                {
-                    board[usrPos.Row, usrPos.Col] = (char)(shipCreated.Id + 48);
-                    usrPos.Row++;
-                }
-            }
-
+            Ship shipCreated = new Ship(shipStartingPos, horizontal, length);
+            CreateInArray(board, shipCreated, shipStartingPos, horizontal, length);
+            
             Console.WriteLine();
 
             // successful msg and return the created ship.
@@ -295,6 +262,64 @@ namespace _2020_Project___Battleships
             return shipCreated;
         }
         // UserCreate END //
+
+
+        /* Item1: boundariesCheck, Item2: occupationCheck, Item3: buildable */
+        private static Tuple<bool, bool, bool> IsBuildable(char[,] board, Position shipStartingPos, bool horizontal, int length)
+        {
+            bool occupationCheck = true;
+            bool boundariesCheck = BoundariesCheck(board, shipStartingPos, horizontal, length);
+
+
+            // run boundaries check first and if passed - run occupation check
+            // because if out of boundaries the occupation check will crush the program cause it using the array.
+            if (boundariesCheck)
+            {
+                occupationCheck = OccupationCheck(board, shipStartingPos, horizontal, length);
+                if (occupationCheck)
+                    return Tuple.Create(boundariesCheck, occupationCheck, true);
+            }
+
+            return Tuple.Create(boundariesCheck, occupationCheck, false);
+        }
+
+        private static void CreationErrorMsgs(bool boundariesCheck, bool occupationCheck)
+        {
+            // explanation messages why the ship can not be built.
+            if (!boundariesCheck) // out of boundaries
+            {
+                ErrorSymbol();
+                Console.WriteLine("The values you entered cannot build a ship because it out of board boundaries. Please enter new values for the ship.");
+                Console.WriteLine();
+            }
+            if (!occupationCheck) // other ship occupying slot(s)
+            {
+                ErrorSymbol();
+                Console.WriteLine("The values you entered cannot build a ship because another ship is occupying some slots. Please enter new values for the ship.");
+                Console.WriteLine();
+            }
+        }
+
+
+        private static void CreateInArray(char[,] board, Ship shipCreated, Position startingPos, bool horizontal, int length)
+        {
+            if (horizontal)
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    board[startingPos.Row, startingPos.Col] = (char)(shipCreated.Id + '0');
+                    startingPos.Col++;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < length; i++)
+                {
+                    board[startingPos.Row, startingPos.Col] = (char)(shipCreated.Id + '0');
+                    startingPos.Row++;
+                }
+            }
+        }
 
 
 
@@ -307,45 +332,22 @@ namespace _2020_Project___Battleships
         {
             // Declaring the "building permits"
             bool buildable = false;
-            bool boundariesCheck = false;
-            bool occupationCheck = false;
             bool horizontal = false; // Direction Set (temp value)
-            Position cpuPos = new Position(0, 0); // Position Set (temp values)
+            Position startingPos = new Position(0, 0); // Position Set (temp values)
                        
 
             while (!buildable)
             {
-                cpuPos = new Position(GenerateRandInt(0, board.GetLength(0) - 1), GenerateRandInt(0, board.GetLength(1) - 1));
+                startingPos = new Position(GenerateRandInt(0, board.GetLength(0) - 1), GenerateRandInt(0, board.GetLength(1) - 1));
                 horizontal = GenerateRandBool();
 
-                // building checks with new values
-                boundariesCheck = BoundariesCheck(board, cpuPos, horizontal, length);
-                if (boundariesCheck)
-                {
-                    occupationCheck = OccupationCheck(board, cpuPos, horizontal, length);
-                    if (occupationCheck) buildable = true;
-                }
+                Tuple<bool, bool, bool> buildingResults = IsBuildable(board, startingPos, horizontal, length);
+                buildable = buildingResults.Item3;
             }
 
             // create the ship and mark it in the board
-            Ship shipCreated = new Ship(cpuPos, horizontal, length);
-
-            if (horizontal)
-            {
-                for (int i = 0; i < length; i++)
-                {
-                    board[cpuPos.Row, cpuPos.Col] = (char)(shipCreated.Id + 48);
-                    cpuPos.Col++;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < length; i++)
-                {
-                    board[cpuPos.Row, cpuPos.Col] = (char)(shipCreated.Id + 48);
-                    cpuPos.Row++;
-                }
-            }
+            Ship shipCreated = new Ship(startingPos, horizontal, length);
+            CreateInArray(board, shipCreated, startingPos, horizontal, length);
 
             return shipCreated;
         }

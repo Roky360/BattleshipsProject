@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using static System.ConsoleColor;
 
 namespace _2020_Project___Battleships
@@ -81,6 +82,7 @@ namespace _2020_Project___Battleships
         public static void HyphenUnderline(int length)
         {
             for (int i = 0; i < length; Console.Write("-"), i++) ;
+            Console.WriteLine();
         }
 
 
@@ -88,6 +90,16 @@ namespace _2020_Project___Battleships
         {
             for (int i = 0; i < (LineLength - txt.Length) / 2; Console.Write(" "), i++) ;
             Console.WriteLine(txt);
+        }
+
+
+        public static void PressEnterToContinue()
+        {
+            FGcolor(DarkGray);
+            Console.Write("Press ENTER to continue");
+            Console.ReadKey();
+            //Thread.Sleep(100);
+            Console.Clear();
         }
 
 
