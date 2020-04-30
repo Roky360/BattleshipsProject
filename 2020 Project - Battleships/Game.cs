@@ -210,12 +210,12 @@ namespace _2020_Project___Battleships
             Position boardSize = new Position(10, 10);
 
 
-            while (!isNumber || size < 6 || size > 10)
+            while (!isNumber || size < 7 || size > 10)
             {
                 Console.Clear();
 
                 FGcolor(White);
-                Console.WriteLine("Please enter the new size for row and column of the board, between 6-10 (10 is the recomended size):");
+                Console.WriteLine("Please enter the new size for row and column of the board, between 7-10 (10 is the recomended size):");
                 InputLine(4);
 
                 isNumber = int.TryParse(Console.ReadLine(), out size);
