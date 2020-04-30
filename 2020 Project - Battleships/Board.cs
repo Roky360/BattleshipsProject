@@ -21,10 +21,10 @@ namespace _2020_Project___Battleships
         }
 
 
+
         /* - Reset Board -
          ~ Description: Resets the array of the board to null.
          * Logic: Moves over the whole 2D array and sets the values to '\0' (null)
-         > RETURNS: Nothing.
          */
         public static void ResetBoard(char[,] board)
         {
@@ -40,22 +40,40 @@ namespace _2020_Project___Battleships
 
 
         /* - Print Board -
-         ~ Description: Prints the board to the screen
-         * Logic: Prints the array and it's values via nested for loop, and the instructors - numbers (0-9) and letters (A-J)
+         ~ Description: The main function that displays the game board, customized for each player.
+         * Logic: Calls the different functions to print out all the parts of the game board.
          # Syntax: boardName.PrintBoard();
-         > RETURNS: Nothing, just prints the board to the screen.
          */
         public void PrintBoard()
         {
             char[,] board = ArrayBoard;
+            bool isPlayer = Name != CpuName;
 
 
-            // Decide in which color to print the title
-            if (Name == CpuName)  FGcolor(Red);   // CPU - Red
-            else                FGcolor(Cyan);  // User - Cyan
+            // Title
+            FGcolor(isPlayer ? Cyan : Red); // Decide in which color to print the title
             Console.WriteLine($"{Name}'s Board:");
 
-            // print board index - numbers
+            // Column Index - Numbers
+            IndexColumnPrint();
+            // underline
+            Console.Write("  ");
+            Underline(board.GetLength(0) * 4);
+
+            // Board Body
+            MainBoardPrint(isPlayer);
+
+            Console.WriteLine();
+        }
+        // PrintBoard END //
+
+        /* - Index Column Print - 
+        ~ Description: Prints the index for the columns (numbers).
+        * */
+        private void IndexColumnPrint()
+        {
+            char[,] board = ArrayBoard;
+
             Console.Write("  ");
             for (int i = 0; i < board.GetLength(0); i++)
             {
@@ -66,191 +84,135 @@ namespace _2020_Project___Battleships
             }
             FGcolor(DarkGray);
             Console.WriteLine("|");
-            FGcolor(Gray);
-
-            // underline
-            Console.Write("  ");
-            FGcolor(DarkGray);
-            for (int j = 0; j < board.GetLength(0) * 4; Console.Write("-"), j++) ;
-            FGcolor(Gray);
-            Console.WriteLine();
-
-            if (Name == CpuName)
-            {
-                CpuMainBoardPrint();
-            }
-            else UserMainBoardPrint();
-
-            Console.WriteLine();
         }
-        // PrintBoard END //
+        // IndexColumnPrint END //
 
-
-        private void CpuMainBoardPrint()
+        /* - Underline - 
+        ~ Description: Used to print an underline below each line of teh board.
+        * */
+        private void Underline(int length)
         {
             char[,] board = ArrayBoard;
-            Position userHitColor = new Position(-1, -1); // starting values, in case that the LastHitColor is null
-            // check if the LastHitColor of the player is empty so the program will not crush from the Player object being empty
-            if (Players != null && Players[0] != null)
-            {
-                userHitColor.CopyAttributes(Players[0].LastHitColor);
-            }
 
-
-            for (int i = 0; i < board.GetLength(0); i++)
-            {
-                // print board index - letters
-                Console.Write((char)('A' + i) + " ");
-
-                for (int j = 0; j < board.GetLength(1); j++) // print the board
-                {
-                    if (i == userHitColor.Row && j == userHitColor.Col)
-                    {
-                        switch (board[i, j])
-                        {
-                            case '/':
-                                FGcolor(DarkGray);
-                                Console.Write("| ");
-                                BGcolor(Red);
-                                Console.Write(" ");
-                                BGcolor(Black);
-                                Console.Write(" ");
-                                break;
-
-                            case 'x':
-                                FGcolor(DarkGray);
-                                Console.Write("| ");
-                                FGcolor(Green);
-                                Console.Write(board[i, j] + " ");
-                                break;
-                        }//switch
-                    }//if hitColor = board Position
-                    else
-                    {
-                        // Missed '/' | Red BG
-                        if (board[i, j] == '/')
-                        {
-                            FGcolor(DarkGray);
-                            Console.Write("| ");
-                            BGcolor(DarkRed);
-                            Console.Write(" ");
-                            BGcolor(Black);
-                            Console.Write(" ");
-                        }
-                        else // Hit 'x' | Dark Green FG
-                        if (board[i, j] == 'x')
-                        {
-                            FGcolor(DarkGray);
-                            Console.Write("| ");
-                            FGcolor(DarkGreen);
-                            Console.Write(board[i, j] + " ");
-                        }
-                        else // null slot | null
-                        {
-                            FGcolor(DarkGray);
-                            Console.Write("|   ");
-                        }
-                    }
-                }//for j (rows)
-
-                // Print underline between the lines
-                FGcolor(DarkGray);
-                Console.WriteLine("|");
-                for (int j = 0; j < board.GetLength(0) * 4 + 2; Console.Write("-"), j++) ;
-                Console.WriteLine();
-                FGcolor(Gray);
-            }//for i (columns)
+            FGcolor(DarkGray);
+            HyphenUnderline(length);
+            FGcolor(Gray);
         }
-        // CpuMainBoardPrint END //
+        // Underline END //
 
 
-        private void UserMainBoardPrint()
+        /* - Main Board Print - 
+        ~ Description: prints the main part of the board (the actuall array and it's contents).
+        * Logic: Uses a nested 'for' loop to print the index letters (for the rows),
+        * and then calls the ColorCharDecider to print the content of the array in the correct colors.
+        * */
+        private void MainBoardPrint(bool isPlayer)
         {
             char[,] board = ArrayBoard;
             Position cpuHitColor = new Position(-1, -1); // starting values, in case that the LastHitColor is null
             // check if the LastHitColor of the player is empty so the program will not crush from the Player object being empty
-            if (Players != null && Players[1] != null)
+            if (Players != null && Players[isPlayer ? 1 : 0] != null)
             {
-                cpuHitColor.CopyAttributes(Players[1].LastHitColor);
+                cpuHitColor.CopyAttributes(Players[isPlayer ? 1 : 0].LastShotColor);
             }
 
 
             for (int i = 0; i < board.GetLength(0); i++)
             {
-                // print board index - letters
-                Console.Write((char)('A' + i) + " ");
+                // Row Index - Letters
+                Console.Write((char)('A' + i) + " |");
 
                 for (int j = 0; j < board.GetLength(1); j++) // print the board
                 {
-                    if (i == cpuHitColor.Row && j == cpuHitColor.Col)
-                    {
-                        switch (board[i, j])
-                        {
-                            // Missed Last Turn | Gray BG
-                            case '/':
-                                FGcolor(DarkGray);
-                                Console.Write("| ");
-                                BGcolor(Gray);
-                                Console.Write(" ");
-                                BGcolor(Black);
-                                Console.Write(" ");
-                                break;
+                    char currentSpot = board[i, j];
+                    bool lastHitColorSpot = (i == cpuHitColor.Row) && (j == cpuHitColor.Col);
 
-                            // Hit Last Turn | Red FG
-                            case 'x':
-                                FGcolor(DarkGray);
-                                Console.Write("| ");
-                                FGcolor(Red);
-                                Console.Write(board[i, j] + " ");                                
-                                break;
-                        }//switch
-                    }//if hitColor = board Position
-                    else
-                    {
-                        // Missed '/' | Dark Gray BG
-                        if (board[i, j] == '/')
-                        {
-                            FGcolor(DarkGray);
-                            Console.Write("| ");
-                            BGcolor(DarkGray);
-                            Console.Write(" ");
-                            BGcolor(Black);
-                            Console.Write(" ");
-                        }
-                        else // Hit 'x' | Dark Red FG
-                        if (board[i, j] == 'x')
-                        {
-                            FGcolor(DarkGray);
-                            Console.Write("| ");
-                            FGcolor(DarkRed);
-                            Console.Write(board[i, j] + " ");
-                        }
-                        else // Player's Ship | Dark Cyan FG
-                        if (board[i, j] >= '0' && board[i, j] <= '4')
-                        {
-                            FGcolor(DarkGray);
-                            Console.Write("| ");
-                            FGcolor(DarkCyan);
-                            Console.Write(board[i, j] + " ");
-                        }
-                        else // null slot | null
-                        {
-                            FGcolor(DarkGray);
-                            Console.Write("|   ");
-                        }
-                    }
-                    
+                    ColorCharDecider(currentSpot, lastHitColorSpot, isPlayer);
                 }//for j (rows)
+                Console.WriteLine();
 
                 // Print underline between the lines
-                FGcolor(DarkGray);
-                Console.WriteLine("|");
-                for (int j = 0; j < board.GetLength(0) * 4 + 2; Console.Write("-"), j++) ;
-                Console.WriteLine();
-                FGcolor(Gray);
-            }//for i (columns)            
+                Underline(board.GetLength(0) * 4 + 2);
+            }//for i (columns)
         }
-        // UserMainBoardPrint END //
+        // MainBoardPrint END //
+
+        /* - Color Char Decider - 
+        ~ Description: Uses a switch to decide what to print based on the content of the current spot of the array.
+        * Logic: The Color Char Decider uses dedicated functions to print the differrent kinds of slots.
+        * In addition, it uses ternary operators to decide which colors to pass to those functions,
+        * based on the lastHitColorSpot (contains the last shot position) and the isPlayer (cause there are different colors for each player) variables.
+        * */
+        private void ColorCharDecider(char currentSpot, bool lastHitColorSpot, bool isPlayer)
+        {
+            switch (currentSpot)
+            {
+                // Missed '/' | Gray & Dark Gray BG : Red & Dark Red
+                case '/':
+                    MissedSpot(isPlayer ? (lastHitColorSpot ? Gray : DarkGray) : (lastHitColorSpot ? Red : DarkRed));
+                    break;
+
+                // Hit 'x' | Red & Dark Red FG : Green & DarkGreen
+                case 'x':
+                    PrintContent(isPlayer ? (lastHitColorSpot ? Red : DarkRed) : (lastHitColorSpot ? Green : DarkGreen), currentSpot);
+                    break;
+
+                // Player's Ship | Dark Cyan FG
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    PrintContent(DarkCyan, currentSpot);
+                    break;
+
+                // null slot | null
+                default:
+                    EmptySpot();
+                    break;
+            }//switch
+        }
+        // ColorCharDecider END //
+
+
+        /* - Missed Spot - 
+        ~ Description: Used by the MainBoardPrint function to print "missed spot" ('/' in the array).
+        * */
+        private static void MissedSpot(ConsoleColor color)
+        {
+            FGcolor(DarkGray);
+            Console.Write(" ");
+            BGcolor(color);
+            Console.Write(" ");
+            BGcolor(Black);
+            Console.Write(" |");
+        }
+        // MissedSpot END //
+
+        /* - Print Content - 
+        ~ Description:
+        * Logic: The PrintContent function gets the desired color and the character to print and prints it in the correct format design.
+        * */
+        private void PrintContent(ConsoleColor color, char currentSpot)
+        {
+            FGcolor(DarkGray);
+            Console.Write(" ");
+            FGcolor(color);
+            Console.Write(currentSpot + " ");
+            FGcolor(DarkGray);
+            Console.Write("|");
+        }
+        // PrintContent END //
+
+        /* - Empty Spot - 
+        ~ Description: Used by the MainBoardPrint function to print an empty spot.
+        * */
+        private static void EmptySpot()
+        {
+            FGcolor(DarkGray);
+            Console.Write("   |");
+        }
+        // EmptySpot END //
 
 
     }
